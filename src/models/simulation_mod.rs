@@ -22,10 +22,7 @@ impl SimulationModel{
             if train_mover_group.len() != 0{
                 train_mover_group = self.trains_run(train_mover_group);
             };
-            
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
-            self.mover_group_model.select_route(target_count);
-            self.mover_group_model.initilize_mover();
             
             let mut total_car = 0;
             let mut total_train = 0;
@@ -37,6 +34,10 @@ impl SimulationModel{
                 }
                 println!("{:?}\truntime:{}",hoge,hoge.arrivaltime-hoge.start_time)
             }
+            
+            self.mover_group_model.select_route(target_count);
+            self.mover_group_model.initilize_mover();
+            
             println!("car:{} train:{}",total_car,total_train);
         }
     }
@@ -45,6 +46,7 @@ impl SimulationModel{
         &self, 
         mut car_mover_group: Vec<mover_group_mod::MoverModel>,
     ) -> Vec<mover_group_mod::MoverModel>{
+        car_mover_group[0].velocity = 51.1;
         let mut time: i64 = 0;
         let route_length = car_mover_group[0].route.get_route_length();
         let mut lead_runner = 0;

@@ -24,10 +24,7 @@ impl MoverGroupModel{
                 start_time: id as i64,
                 arrivaltime: std::i64::MAX,
                 location: 0.0,
-                velocity: match id {
-                    0 => 51.1,
-                    _ => 0.0,
-                },
+                velocity: 0.0,
             };
             mover_group_model.model_item.push(mover);
         }
@@ -63,6 +60,7 @@ impl MoverGroupModel{
     pub fn select_route(&mut self, lisning_target_count: usize){
         let half: usize = lisning_target_count / 2;
         let movers_count: usize = self.model_item.len() as usize;
+        let mut next_mover_group_model = self.model_item.clone();
 
         for lisner_id in 0..movers_count{
             let shift = 
@@ -90,19 +88,18 @@ impl MoverGroupModel{
             let mut rng = rand::thread_rng();
             let probability: f32 = rng.gen(); 
             if probability >= 0.95{
-                self.model_item[lisner_id].route = self.model_item[first_mover_id].route.clone();
+                next_mover_group_model[lisner_id].route = self.model_item[first_mover_id].route.clone();
             }
-        };
+        }
+
+        self.model_item = next_mover_group_model;
     }
 
     pub fn initilize_mover(&mut self){
         for id in 0..self.model_item.len(){
             self.model_item[id].arrivaltime = std::i64::MAX;
             self.model_item[id].location = 0.0;
-            self.model_item[id].velocity = match id {
-                0 => 51.1,
-                _ => 0.0,
-            };
+            self.model_item[id].velocity = 0.0;
         }
     }
 }
