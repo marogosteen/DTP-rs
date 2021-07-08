@@ -73,7 +73,7 @@ impl MoverGroupModel{
                     movers_count - lisning_target_count
                 } else{
                     lisner_id - half
-                };    
+                }; 
             // 聞き込み件数が偶数でも，自身を含めた奇数にする．
             let target_id_list: Vec<usize> = (0 + shift .. half * 2 + 1 + shift).collect::<Vec<usize>>();
             let mut first_mover_id: usize = lisner_id;
@@ -84,7 +84,7 @@ impl MoverGroupModel{
                 if first_mover_time > run_time{
                     first_mover_id = target_id;
                     first_mover_time = run_time;
-                };
+                }
             }
 
             let mut rng = rand::thread_rng();
@@ -92,7 +92,7 @@ impl MoverGroupModel{
             if probability >= 0.95{
                 self.model_item[lisner_id].route = self.model_item[first_mover_id].route.clone();
             }
-        }
+        };
     }
 
     pub fn initilize_mover(&mut self){

@@ -15,14 +15,16 @@ impl SimulationModel{
 
             let (mut car_mover_group, mut train_mover_group) 
                 = self.mover_group_model.devide_route();
-            car_mover_group = self.cars_run(car_mover_group);
-            train_mover_group = self.trains_run(train_mover_group);
+                
+            if car_mover_group.len() != 0{
+                car_mover_group = self.cars_run(car_mover_group);
+            };
+            if train_mover_group.len() != 0{
+                train_mover_group = self.trains_run(train_mover_group);
+            };
+            
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
             self.mover_group_model.select_route(target_count);
-            for id in 0..self.mover_group_model.model_item.len(){
-                let hoge = &self.mover_group_model.model_item[id];
-                println!("{:?}\truntime:{}",hoge,hoge.arrivaltime-hoge.start_time)
-            }
             self.mover_group_model.initilize_mover();
             
             let mut total_car = 0;
