@@ -11,20 +11,23 @@ impl MoverGroupModel{
             model_item: Vec::new()
         };
         
-        for i in 0..generate{
+        for id in 0..generate{
             let mover = MoverModel{
-                id: i,
-                route: 
-                    if std::cmp::min(i%3,1) == 0{
+                id: id,
+                route:
+                    if std::cmp::min(id%3,1) == 0{
                         Route::Car
                     }else{
                         Route::Train
                     },
                 ride_num: 1.43,
-                start_time: 1 + i as i64,
+                start_time: id as i64,
                 arrivaltime: std::i64::MAX,
                 location: 0.0,
-                velocity: if i == 0{51.1}else{0.0},
+                velocity: match id {
+                    0 => 51.1,
+                    _ => 0.0,
+                },
             };
             mover_group_model.model_item.push(mover);
         }
@@ -32,9 +35,7 @@ impl MoverGroupModel{
         return mover_group_model;
     }
     
-    pub fn devide_route(
-        &self, 
-    ) -> (Vec<MoverModel>,Vec<MoverModel>){
+    pub fn devide_route(&self) -> (Vec<MoverModel>,Vec<MoverModel>){
         let mut car_mover_group: Vec<MoverModel> = Vec::new();
         let mut train_mover_group: Vec<MoverModel> = Vec::new();
         for mover in self.model_item.iter(){
@@ -93,6 +94,17 @@ impl MoverGroupModel{
             }
         }
     }
+
+    pub fn initilize_mover(&mut self){
+        for id in 0..self.model_item.len(){
+            self.model_item[id].arrivaltime = std::i64::MAX;
+            self.model_item[id].location = 0.0;
+            self.model_item[id].velocity = match id {
+                0 => 51.1,
+                _ => 0.0,
+            };
+        }
+    }
 }
 
 #[derive(Debug,Clone)]
@@ -122,4 +134,13 @@ impl Route{
         };
         return route_length;
     }
+    /*
+    pub fn get_route_name(&self) -> &str{
+        let route_name: &str = match self {
+            Self::Car => "Car",
+            Self::Train => "Train",
+        };
+        return route_name;
+    }
+    */
 }
