@@ -10,23 +10,9 @@ impl MoverGroupModel{
         let mut mover_group_model = MoverGroupModel{
             model_item: Vec::new()
         };
-        
+
         for id in 0..generate{
-            let mover = MoverModel{
-                id: id,
-                route:
-                    if std::cmp::min(id%3,1) == 0{
-                        Route::Car
-                    }else{
-                        Route::Train
-                    },
-                ride_num: 1.43,
-                start_time: id as i64,
-                arrivaltime: std::i64::MAX,
-                location: 0.0,
-                velocity: 0.0,
-            };
-            mover_group_model.model_item.push(mover);
+            mover_group_model.model_item.push(MoverModel::new(id));
         }
         
         return mover_group_model;
@@ -117,6 +103,27 @@ pub struct MoverModel{
     pub velocity:    f64,
 }
 
+impl MoverModel{
+    pub fn new(id: i32) -> MoverModel{
+        let mover_model = MoverModel{
+            id: id,
+            route:
+                if std::cmp::min(id%3,1) == 0{
+                    Route::Car
+                }else{
+                    Route::Train
+                },
+            ride_num: 1.43,
+            start_time: id as i64,
+            arrivaltime: std::i64::MAX,
+            location: 0.0,
+            velocity: 0.0,
+        };
+
+        return mover_model;
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Route{
     Car,
@@ -131,13 +138,4 @@ impl Route{
         };
         return route_length;
     }
-    /*
-    pub fn get_route_name(&self) -> &str{
-        let route_name: &str = match self {
-            Self::Car => "Car",
-            Self::Train => "Train",
-        };
-        return route_name;
-    }
-    */
 }
