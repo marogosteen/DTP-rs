@@ -8,14 +8,12 @@ impl SimulationModel{
     const TIME_INTERVAL: i64 = 1;
     
     pub fn run(mut self, days: usize){
-        let target_count = 3;
-
         for day in 0..days{ 
             println!("\nday: {}",day);
-
+            
             let (mut car_mover_group, mut train_mover_group) 
-                = self.mover_group_model.devide_route();
-                
+            = self.mover_group_model.devide_model();
+            
             if car_mover_group.len() != 0{
                 car_mover_group = self.cars_run(car_mover_group);
             };
@@ -35,6 +33,7 @@ impl SimulationModel{
                 println!("{:?}\truntime:{}",hoge,hoge.arrivaltime-hoge.start_time)
             }
             
+            let target_count = 3;
             self.mover_group_model.select_route(target_count);
             self.mover_group_model.initilize_mover();
             

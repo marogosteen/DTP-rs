@@ -18,7 +18,7 @@ impl MoverGroupModel{
         return mover_group_model;
     }
     
-    pub fn devide_route(&self) -> (Vec<MoverModel>,Vec<MoverModel>){
+    pub fn devide_model(&self) -> (Vec<MoverModel>,Vec<MoverModel>){
         let mut car_mover_group: Vec<MoverModel> = Vec::new();
         let mut train_mover_group: Vec<MoverModel> = Vec::new();
         for mover in self.model_item.iter(){
