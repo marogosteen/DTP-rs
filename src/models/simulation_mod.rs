@@ -17,11 +17,12 @@ impl SimulationModel{
             train_mover_group = self.trains_run(train_mover_group);
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
             self.mover_group_model.select_route(target_count);
-
+            
             println!("\nday: {}",day);
             for id in 0..10{
                 println!("{:?}",self.mover_group_model.model_item[id])
             }
+            
         }
     }
 
@@ -34,7 +35,6 @@ impl SimulationModel{
         
         while car_mover_group.last().unwrap().arrivaltime == std::i64::MAX {
             time += SimulationModel::TIME_INTERVAL;
-            println!("{}",time);
             let mut traffic_density:f64 = 0.0;
             let mut lead_runner = 0;
 
@@ -46,21 +46,20 @@ impl SimulationModel{
                         1000.0 / car_mover_group[car_id - 1].location - car_mover_group[car_id].location
                     };
 
-                if car_mover_group[car_id].start_time >= time{
+                if car_mover_group[car_id].start_time <= time{
                     let location: f64 
-                        = car_mover_group[car_id].location 
-                        + car_mover_group[car_id].velocity / 3.6 * SimulationModel::TIME_INTERVAL as f64;
+                        = car_mover_group[car_id].location + car_mover_group[car_id].velocity / 3.6 * SimulationModel::TIME_INTERVAL as f64;
                     let velocity: f64 
-                        = [0.0, 51.1 - 0.58647 * traffic_density].iter().fold(0.0/0.0, |x,y| y.max(x));
-                    
+                        = (51.1 - 0.58647 * traffic_density).max(0.0).min(51.1);
+                        //= [0.0, 51.1 - 0.58647 * traffic_density].iter().fold(0.0/0.0, |x,y| y.max(x));
+
                     car_mover_group[car_id].location = location;
                     car_mover_group[car_id].velocity = velocity;
-                    
-                    if car_mover_group[car_id].route.get_route_length() >= route_length{
+
+                    if car_mover_group[car_id].location >= route_length{
                         lead_runner = car_id;
                         car_mover_group[car_id].arrivaltime
-                            //= [time,car_mover_group[car_id].arrivaltime].iter().fold(0.0/0.0, |x,y| y.min(x));
-                            =std::cmp::min(time,car_mover_group[car_id].arrivaltime);
+                            = std::cmp::min(time,car_mover_group[car_id].arrivaltime);
                     }
                 }
             }
@@ -81,6 +80,7 @@ impl SimulationModel{
         let mut first_passenger_id: usize = 0;
 
         for mover_id in 0..total_movers{
+            println!("index:{} moverID:{}",mover_id,train_mover_group[mover_id].id);
             passengers += train_mover_group[mover_id].ride_num;
             if passengers >= capacity{
                 //一車両に乗った客の到着時間は同じになる
@@ -93,6 +93,7 @@ impl SimulationModel{
             }
         }
         if passengers > 0.0{
+            println!("hoge");
             let last_mover_id: usize = total_movers - 1;
             //一車両に乗った客の到着時間は同じになる
             let arrival_time = train_mover_group[last_mover_id].start_time as f64 + route_length / velocity * 3.6;

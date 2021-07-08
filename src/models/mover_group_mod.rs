@@ -21,7 +21,7 @@ impl MoverGroupModel{
                         Route::Train
                     },
                 ride_num: 1.43,
-                start_time: i as i64,
+                start_time: 1 + i as i64,
                 arrivaltime: std::i64::MAX,
                 location: 0.0,
                 velocity: if i == 0{51.1}else{0.0},
@@ -54,7 +54,9 @@ impl MoverGroupModel{
         let mut new_mover_group: Vec<MoverModel> = Vec::new();
         new_mover_group.append(&mut car_mover_group);
         new_mover_group.append(&mut train_mover_group);
-        new_mover_group.sort_by_key(|mover| mover.id)
+        new_mover_group.sort_by_key(|mover| mover.id);
+
+        self.model_item = new_mover_group;
     }
 
     pub fn select_route(&mut self, lisning_target_count: usize){
