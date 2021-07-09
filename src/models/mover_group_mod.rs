@@ -43,7 +43,8 @@ impl MoverGroupModel{
         self.model_item = new_mover_group;
     }
 
-    pub fn select_route(&mut self, lisning_target_count: usize){
+    pub fn select_route(&mut self, mut lisning_target_count: usize){
+        lisning_target_count = std::cmp::min(lisning_target_count, self.model_item.len());
         let half: usize = lisning_target_count / 2;
         let movers_count: usize = self.model_item.len() as usize;
         let mut next_mover_group_model = self.model_item.clone();
