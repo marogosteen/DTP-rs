@@ -83,7 +83,7 @@ impl MoverGroupModel{
         self.model_item = next_mover_group_model;
     }
 
-    pub fn initilize_mover(&mut self){
+    pub fn initialize_mover(&mut self){
         for id in 0..self.model_item.len(){
             self.model_item[id].arrivaltime = std::i64::MAX;
             self.model_item[id].location = 0.0;

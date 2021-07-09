@@ -10,10 +10,9 @@ impl SimulationModel{
     pub fn run(mut self, days: usize){
         for day in 0..days{ 
             println!("\nday: {}",day);
-            
+
             let (mut car_mover_group, mut train_mover_group) 
-            = self.mover_group_model.devide_model();
-            
+                = self.mover_group_model.devide_model();            
             if car_mover_group.len() != 0{
                 car_mover_group = self.cars_run(car_mover_group);
             };
@@ -23,8 +22,9 @@ impl SimulationModel{
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
             let target_count = 3;
             self.mover_group_model.select_route(target_count);
-            self.mover_group_model.initilize_mover();
+            self.mover_group_model.initialize_mover();
             
+            //TODO Debug用メゾット
             let mut total_car = 0;
             let mut total_train = 0;
             for id in 0..self.mover_group_model.model_item.len(){
