@@ -52,12 +52,10 @@ impl SimulationModel{
             time += SimulationModel::TIME_INTERVAL;
 
             for car_id in lead_runner..car_mover_group.len(){
-                let traffic_density: f64 = 
-                    if car_id == 0{
-                        0.0
-                    }else{
-                        1000.0 / car_mover_group[car_id - 1].location - car_mover_group[car_id].location
-                    };
+                let traffic_density: f64 = match car_id{
+                    0 => 0.0,
+                    _ => 1000.0 / (car_mover_group[car_id - 1].location - car_mover_group[car_id].location),
+                };
 
                 if car_mover_group[car_id].start_time < time{
                     let location: f64 
