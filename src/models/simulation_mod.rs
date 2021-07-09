@@ -50,10 +50,9 @@ impl SimulationModel{
         
         while car_mover_group.last().unwrap().arrivaltime == std::i64::MAX {
             time += SimulationModel::TIME_INTERVAL;
-            let mut traffic_density:f64;
 
             for car_id in lead_runner..car_mover_group.len(){
-                traffic_density = 
+                let mut traffic_density: f64 = 
                     if car_id == 0{
                         0.0
                     }else{
