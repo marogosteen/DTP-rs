@@ -52,7 +52,7 @@ impl SimulationModel{
             time += SimulationModel::TIME_INTERVAL;
 
             for car_id in lead_runner..car_mover_group.len(){
-                let mut traffic_density: f64 = 
+                let traffic_density: f64 = 
                     if car_id == 0{
                         0.0
                     }else{
