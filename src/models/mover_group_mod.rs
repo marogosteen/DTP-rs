@@ -63,10 +63,10 @@ impl MoverGroupModel{
             // 聞き込み件数が偶数でも，自身を含めた奇数にする．
             let target_id_list: Vec<usize> = (shift .. half * 2 + 1 + shift).collect::<Vec<usize>>();
             let mut first_mover_id: usize = lisner_id;
-            let mut first_mover_time: i64 = self.model_item[lisner_id].arrivaltime - self.model_item[lisner_id].start_time;
+            let mut first_mover_time: i64 = self.model_item[lisner_id].arrival_time - self.model_item[lisner_id].start_time;
 
             for target_id in target_id_list{
-                let run_time = self.model_item[target_id].arrivaltime - self.model_item[target_id].start_time;
+                let run_time = self.model_item[target_id].arrival_time - self.model_item[target_id].start_time;
                 if first_mover_time > run_time{
                     first_mover_id = target_id;
                     first_mover_time = run_time;
@@ -85,10 +85,28 @@ impl MoverGroupModel{
 
     pub fn initialize_mover(&mut self){
         for id in 0..self.model_item.len(){
-            self.model_item[id].arrivaltime = std::i64::MAX;
+            self.model_item[id].arrival_time = std::i64::MAX;
             self.model_item[id].location = 0.0;
             self.model_item[id].velocity = 0.0;
         }
+    }
+
+    pub fn check_mover(&self){
+        let mut count_route_car = 0;
+        let mut count_route_train = 0;
+        for id in 0..self.model_item.len(){
+            let mover = &self.model_item[id];
+            println!(
+                "id:{} \trun time:{} \tstart:{} \tarrival:{} \troute:{:?}",
+                mover.id, mover.arrival_time - mover.start_time, mover.start_time, mover.arrival_time, mover.route
+            );
+
+            match mover.route{
+                Route::Car => count_route_car+=1,
+                Route::Train => count_route_train+=1,
+            }
+        }
+        println!("car:{} train:{}",count_route_car,count_route_train);
     }
 }
 
@@ -96,7 +114,7 @@ impl MoverGroupModel{
 pub struct MoverModel{
     pub id:          i32,
     pub start_time:  i64,
-    pub arrivaltime: i64,
+    pub arrival_time: i64,
     
     pub route: Route,
     
@@ -117,7 +135,7 @@ impl MoverModel{
                 },
             ride_num: 1.43,
             start_time: id as i64,
-            arrivaltime: std::i64::MAX,
+            arrival_time: std::i64::MAX,
             location: 0.0,
             velocity: 0.0,
         };
@@ -135,8 +153,8 @@ pub enum Route{
 impl Route{
     pub fn get_route_length(&self) -> f64{
         let route_length: f64 = match self {
-            Self::Car => 1000.0,
-            Self::Train => 1000.0,
+            Self::Car => 10000.0,
+            Self::Train => 10000.0,
         };
         return route_length;
     }
