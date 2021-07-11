@@ -3,6 +3,7 @@ use crate::models::mover_group_mod;
 pub struct SimulationModel{
     pub mover_group_model: mover_group_mod::MoverGroupModel,
     pub time_interval: i64,
+    pub car_lane: f64,
     pub car_max_velocity: f64,
     pub train_capacity: f64,
     pub train_velocity: f64,
@@ -52,7 +53,9 @@ impl SimulationModel{
                         if car_id == 0{
                             51.1
                         }else{
-                            let traffic_dencity: f64 = 1000.0 / (car_mover_group[car_id - 1].location - car_mover_group[car_id].location);
+                            let traffic_dencity: f64 
+                                = 1000.0 / (car_mover_group[car_id - 1].location - car_mover_group[car_id].location) / self.car_lane;
+                            
                             (self.car_max_velocity - 0.58647 * traffic_dencity).max(0.0).min(self.car_max_velocity)
                         };
                     car_mover_group[car_id].velocity = velocity;
@@ -62,7 +65,9 @@ impl SimulationModel{
                             = std::cmp::min(time,car_mover_group[car_id].arrival_time);
                     }
                 }
+                println!("{:?}",car_mover_group[car_id]);
             }
+            assert_eq!("","h");
         }
         return car_mover_group;
     }

@@ -6,15 +6,24 @@ pub struct MoverGroupModel{
 }
 
 impl MoverGroupModel{
-    pub fn new(generate:i32,) -> MoverGroupModel{
+    const RIDE_NUM: f64 = 1.43;
+
+    //pub fn new(generate:i32,people) -> MoverGroupModel{
+    pub fn new(people: f64) -> MoverGroupModel{
+        let generate: i32 = (people / MoverGroupModel::RIDE_NUM) as i32;
         let mut mover_group_model = MoverGroupModel{
             model_item: Vec::new()
         };
-
         for id in 0..generate{
-            mover_group_model.model_item.push(MoverModel::new(id));
+            mover_group_model.model_item.push(MoverModel::new(id,MoverGroupModel::RIDE_NUM));
         }
         
+        if people % MoverGroupModel::RIDE_NUM != 0.0{
+            println!("{}",people % MoverGroupModel::RIDE_NUM);
+            let last_ride_num: f64 = people - MoverGroupModel::RIDE_NUM * generate as f64;
+            mover_group_model.model_item.push(MoverModel::new(generate ,last_ride_num));
+        }
+
         return mover_group_model;
     }
     
@@ -124,16 +133,17 @@ pub struct MoverModel{
 }
 
 impl MoverModel{
-    pub fn new(id: i32) -> MoverModel{
+    pub fn new(id: i32, ride_num: f64) -> MoverModel{
         let mover_model = MoverModel{
             id: id,
-            route:
+            /*route:
                 if std::cmp::min(id%3,1) == 0{
                     Route::Car
                 }else{
                     Route::Train
-                },
-            ride_num: 1.43,
+                },*/
+            route:Route::Car,
+            ride_num: ride_num,
             start_time: id as i64,
             arrival_time: std::i64::MAX,
             location: 0.0,
