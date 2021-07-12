@@ -2,10 +2,10 @@ use crate::models::mover_group_mod;
 
 pub struct SimulationModel{
     pub mover_group_model: mover_group_mod::MoverGroupModel,
-    pub time_interval: i64,
+    pub time_interval: u64,
     pub car_lane: f64,
     pub car_max_velocity: f64,
-    pub train_capacity: f64,
+    pub train_capacity: usize,
     pub train_velocity: f64,
 }
 
@@ -36,10 +36,10 @@ impl SimulationModel{
         mut car_mover_group: Vec<mover_group_mod::MoverModel>,
     ) -> Vec<mover_group_mod::MoverModel>{
         car_mover_group[0].velocity = self.car_max_velocity;
-        let mut time: i64 = 0;
+        let mut time: u64 = 0;
         let route_length = car_mover_group[0].route.get_route_length();
 
-        while car_mover_group.last().unwrap().arrival_time == std::i64::MAX {
+        while car_mover_group.last().unwrap().arrival_time == std::u64::MAX {
             time += self.time_interval;
 
             for car_id in 0..car_mover_group.len(){
@@ -77,11 +77,11 @@ impl SimulationModel{
         mut train_mover_group:Vec<mover_group_mod::MoverModel>,
     ) -> Vec<mover_group_mod::MoverModel>{
         let route_length = train_mover_group[0].route.get_route_length();
-        let mut passengers: f64 = 0.0;
+        let mut passengers: usize = 0;
         let mut first_passenger_id: usize = 0;
 
         for current_mover_id in 0..train_mover_group.len(){
-            passengers += train_mover_group[current_mover_id].ride_num;
+            passengers += train_mover_group[current_mover_id].ride;
 
             if passengers >= self.train_capacity{
                 //一車両に乗った客の到着時間は同じになる
@@ -89,19 +89,19 @@ impl SimulationModel{
                     train_mover_group[current_mover_id].start_time as f64 + route_length / self.train_velocity * 3.6;
 
                 for id in first_passenger_id..=current_mover_id{
-                    train_mover_group[id].arrival_time = arrival_time as i64;
+                    train_mover_group[id].arrival_time = arrival_time as u64;
                     train_mover_group[id].location = route_length;
                     train_mover_group[id].velocity = self.train_velocity;
                 }
-                passengers = 0.0;
+                passengers = 0;
                 first_passenger_id = current_mover_id + 1;
             }
         }
-        if passengers > 0.0{
+        if passengers > 0{
             //一車両に乗った客の到着時間は同じになる
             let arrival_time = train_mover_group.last().unwrap().start_time as f64 + route_length / self.train_velocity * 3.6;
             for id in first_passenger_id..train_mover_group.len(){
-                train_mover_group[id].arrival_time = arrival_time as i64;
+                train_mover_group[id].arrival_time = arrival_time as u64;
                 train_mover_group[id].location = route_length;
                 train_mover_group[id].velocity = self.train_velocity;
             }
