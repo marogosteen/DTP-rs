@@ -115,9 +115,13 @@ impl MoverGroupModel{
         }
     }
 
-    pub fn check_mover(&self){
-        let mut count_route_car = 0;
-        let mut count_route_train = 0;
+    pub fn check_mover(&self ) -> (Vec<usize>, Vec<u64>){
+        let mut count_car_ride = 0;
+        let mut car_runtime = 0;
+        let mut count_car_mover = 0;
+        let mut count_train_ride = 0;
+        let mut train_runtime = 0;
+        let mut count_train_mover = 0;
         for id in 0..self.model_item.len(){
             let mover = &self.model_item[id];
             /*
@@ -128,25 +132,43 @@ impl MoverGroupModel{
             */
 
             match mover.route{
-                Route::Car => count_route_car += mover.ride,
-                Route::Train => count_route_train += mover.ride,
+                Route::Car => {
+                    count_car_ride += mover.ride;
+                    car_runtime += mover.arrival_time - mover.start_time;
+                    count_car_mover += 1;
+                }
+                Route::Train => {
+                    count_train_ride += mover.ride;
+                    train_runtime += mover.arrival_time - mover.start_time;
+                    count_train_mover += 1;
+                }
             }
         }
-        println!("car:{} train:{}",count_route_car,count_route_train);
+
+        let average_car_runtime = (car_runtime as f32 / count_car_mover as f32).round() as u64;
+        let average_train_runtime = (train_runtime as f32 / count_train_mover as f32).round() as u64;
+        println!(
+            "car route[{} {}] \truntime [{} {}]",
+            count_car_ride, count_train_ride,
+            average_car_runtime, average_train_runtime,
+        );
+
+        return (vec![count_car_ride, count_train_ride], vec![average_car_runtime, average_train_runtime])
     }
 }
 
 #[derive(Debug,Clone)]
 pub struct MoverModel{
-    pub id:           usize,
-    pub ride:     usize,
+    pub id:   usize,
+    pub ride: usize,
+
     pub start_time:   u64,
     pub arrival_time: u64,
     
     pub route: Route,
     
-    pub location:    f64,
-    pub velocity:    f64,
+    pub location: f64,
+    pub velocity: f64,
 }
 
 impl MoverModel{
@@ -177,8 +199,8 @@ pub enum Route{
 impl Route{
     pub fn get_route_length(&self) -> f64{
         let route_length: f64 = match self {
-            Self::Car => 10000.0,
-            Self::Train => 10000.0,
+            Self::Car => 11400.0,
+            Self::Train => 11400.0,
         };
         return route_length;
     }

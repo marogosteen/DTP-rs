@@ -11,8 +11,11 @@ pub struct SimulationModel{
 
 impl SimulationModel{
     pub fn run(mut self, days: usize){
+        let mut best_ride: Vec<usize> = vec![std::usize::MAX, std::usize::MAX];
+        let mut best_runtime: Vec<u64> = vec![std::u64::MAX, std::u64::MAX];
+
         println!("\nday: 0");
-        self.mover_group_model.check_mover();
+        //self.mover_group_model.check_mover();
 
         for day in 0..days{ 
             println!("\nday: {}",day + 1);
@@ -29,10 +32,19 @@ impl SimulationModel{
 
             let target_count = 3;
             self.mover_group_model.select_route(target_count);
-            self.mover_group_model.check_mover();
+            let (result_ride, result_runtime) = self.mover_group_model.check_mover();
+            if day == 0{
+                best_ride = result_ride;
+                best_runtime = result_runtime;
+            }else if result_runtime[0] + result_runtime[1] < best_runtime[0] + best_runtime[1]{
+                best_ride = result_ride;
+                best_runtime = result_runtime;
+            }
 
             self.mover_group_model.initialize_mover();
         }
+
+        println!("\nbest record {:?} {:?}", best_ride, best_runtime);
     }
 
     fn cars_run(
