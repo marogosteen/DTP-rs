@@ -6,16 +6,40 @@ pub struct MoverGroupModel{
 }
 
 impl MoverGroupModel{
-    pub fn new(generate:i32,) -> MoverGroupModel{
+    const RIDE_RATE: f64 = 1.43;
+
+    pub fn new(people: usize) -> MoverGroupModel{
         let mut mover_group_model = MoverGroupModel{
             model_item: Vec::new()
         };
 
-        for id in 0..generate{
-            mover_group_model.model_item.push(MoverModel::new(id));
+        let ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people);
+        for (id,ride) in ride_vec.into_iter().enumerate(){
+            mover_group_model.model_item.push(MoverModel::new(id,ride));
         }
-        
+
         return mover_group_model;
+    }
+
+    fn generate_ride_vec(people: usize) -> Vec<usize>{
+        let mut mover: Vec<usize> = Vec::new();
+        let mut count:  usize = 0;
+        loop{
+            count += 1;
+            let totalride = (MoverGroupModel::RIDE_RATE * count as f64).round() as usize;
+            let ride = totalride - (MoverGroupModel::RIDE_RATE * (count - 1) as f64).round() as usize;
+            
+            if totalride as usize == people{
+                mover.push(ride);
+                return mover
+            }else if totalride as usize > people{
+                mover.push(1);
+                return mover
+            }else{
+                mover.push(ride);
+            }
+        }
+
     }
     
     pub fn devide_model(&self) -> (Vec<MoverModel>,Vec<MoverModel>){
@@ -63,7 +87,7 @@ impl MoverGroupModel{
             // 聞き込み件数が偶数でも，自身を含めた奇数にする．
             let target_id_list: Vec<usize> = (shift .. half * 2 + 1 + shift).collect::<Vec<usize>>();
             let mut first_mover_id: usize = lisner_id;
-            let mut first_mover_time: i64 = self.model_item[lisner_id].arrival_time - self.model_item[lisner_id].start_time;
+            let mut first_mover_time: u64 = self.model_item[lisner_id].arrival_time - self.model_item[lisner_id].start_time;
 
             for target_id in target_id_list{
                 let run_time = self.model_item[target_id].arrival_time - self.model_item[target_id].start_time;
@@ -85,7 +109,7 @@ impl MoverGroupModel{
 
     pub fn initialize_mover(&mut self){
         for id in 0..self.model_item.len(){
-            self.model_item[id].arrival_time = std::i64::MAX;
+            self.model_item[id].arrival_time = std::u64::MAX;
             self.model_item[id].location = 0.0;
             self.model_item[id].velocity = 0.0;
         }
@@ -96,14 +120,16 @@ impl MoverGroupModel{
         let mut count_route_train = 0;
         for id in 0..self.model_item.len(){
             let mover = &self.model_item[id];
+            /*
             println!(
                 "id:{} \trun time:{} \tstart:{} \tarrival:{} \troute:{:?}",
                 mover.id, mover.arrival_time - mover.start_time, mover.start_time, mover.arrival_time, mover.route
             );
+            */
 
             match mover.route{
-                Route::Car => count_route_car+=1,
-                Route::Train => count_route_train+=1,
+                Route::Car => count_route_car += mover.ride,
+                Route::Train => count_route_train += mover.ride,
             }
         }
         println!("car:{} train:{}",count_route_car,count_route_train);
@@ -112,30 +138,28 @@ impl MoverGroupModel{
 
 #[derive(Debug,Clone)]
 pub struct MoverModel{
-    pub id:          i32,
-    pub start_time:  i64,
-    pub arrival_time: i64,
+    pub id:           usize,
+    pub ride:     usize,
+    pub start_time:   u64,
+    pub arrival_time: u64,
     
     pub route: Route,
     
-    pub ride_num:    f64,
     pub location:    f64,
     pub velocity:    f64,
 }
 
 impl MoverModel{
-    pub fn new(id: i32) -> MoverModel{
+    pub fn new(id: usize, ride: usize) -> MoverModel{
         let mover_model = MoverModel{
             id: id,
-            route:
-                if std::cmp::min(id%3,1) == 0{
-                    Route::Car
-                }else{
-                    Route::Train
-                },
-            ride_num: 1.43,
-            start_time: id as i64,
-            arrival_time: std::i64::MAX,
+            route: match std::cmp::min(id%2,1){
+                0 => Route::Car,
+                _ => Route::Train,
+            },
+            ride: ride,
+            start_time: id as u64,
+            arrival_time: std::u64::MAX,
             location: 0.0,
             velocity: 0.0,
         };
