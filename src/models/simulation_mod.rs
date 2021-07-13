@@ -11,8 +11,11 @@ pub struct SimulationModel{
 
 impl SimulationModel{
     pub fn run(mut self, days: usize){
+        println!("\nday: 0");
+        self.mover_group_model.check_mover();
+
         for day in 0..days{ 
-            println!("\nday: {}",day);
+            println!("\nday: {}",day + 1);
 
             let (mut car_mover_group, mut train_mover_group) 
                 = self.mover_group_model.devide_model();            
@@ -24,9 +27,10 @@ impl SimulationModel{
             };
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
 
-            self.mover_group_model.check_mover();
             let target_count = 3;
             self.mover_group_model.select_route(target_count);
+            self.mover_group_model.check_mover();
+
             self.mover_group_model.initialize_mover();
         }
     }
@@ -65,9 +69,7 @@ impl SimulationModel{
                             = std::cmp::min(time,car_mover_group[car_id].arrival_time);
                     }
                 }
-                println!("{:?}",car_mover_group[car_id]);
             }
-            assert_eq!("","h");
         }
         return car_mover_group;
     }

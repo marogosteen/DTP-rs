@@ -18,13 +18,6 @@ impl MoverGroupModel{
             mover_group_model.model_item.push(MoverModel::new(id,ride));
         }
 
-        let mut sum = 0;
-        for id in 0..mover_group_model.model_item.len(){
-            println!("{:?}",mover_group_model.model_item[id]);
-            sum += mover_group_model.model_item[id].ride
-        }
-        println!("sum{} ave{}",sum,sum as f32/mover_group_model.model_item.len() as f32 );
-        assert_eq!("h","");
         return mover_group_model;
     }
 
@@ -127,14 +120,16 @@ impl MoverGroupModel{
         let mut count_route_train = 0;
         for id in 0..self.model_item.len(){
             let mover = &self.model_item[id];
+            /*
             println!(
                 "id:{} \trun time:{} \tstart:{} \tarrival:{} \troute:{:?}",
                 mover.id, mover.arrival_time - mover.start_time, mover.start_time, mover.arrival_time, mover.route
             );
+            */
 
             match mover.route{
-                Route::Car => count_route_car+=1,
-                Route::Train => count_route_train+=1,
+                Route::Car => count_route_car += mover.ride,
+                Route::Train => count_route_train += mover.ride,
             }
         }
         println!("car:{} train:{}",count_route_car,count_route_train);
