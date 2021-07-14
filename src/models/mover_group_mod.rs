@@ -147,11 +147,8 @@ impl MoverGroupModel{
 
         let average_car_runtime = (car_runtime as f32 / count_car_mover as f32).round() as u64;
         let average_train_runtime = (train_runtime as f32 / count_train_mover as f32).round() as u64;
-        println!(
-            "car route[{} {}] \truntime [{} {}]",
-            count_car_ride, count_train_ride,
-            average_car_runtime, average_train_runtime,
-        );
+        println!("car_ride:{} train_ride:{}", count_car_ride, count_train_ride);
+        println!("car_runtime:{} trian_runtime{}\n", average_car_runtime, average_train_runtime);
 
         return (vec![count_car_ride, count_train_ride], vec![average_car_runtime, average_train_runtime])
     }
