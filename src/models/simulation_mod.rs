@@ -11,11 +11,14 @@ pub struct SimulationModel{
 
 impl SimulationModel{
     pub fn run(mut self, days: usize){
-        println!("\nday: 0");
-        self.mover_group_model.check_mover();
+        let mut best_day: usize = 0;
+        let mut best_record = SimulationRecord::new();
+        //let mut best_ride:Vec<usize> = vec![std::usize::MAX,std::usize::MAX];
+        //let mut best_runtime:Vec<u64> = vec![std::u64::MAX,std::u64::MAX];
 
         for day in 0..days{ 
             println!("\nday: {}",day + 1);
+            let mut record = SimulationRecord::new();
 
             let (mut car_mover_group, mut train_mover_group) 
                 = self.mover_group_model.devide_model();            
@@ -26,13 +29,29 @@ impl SimulationModel{
                 train_mover_group = self.trains_run(train_mover_group);
             };
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
-
+            
             let target_count = 3;
-            self.mover_group_model.select_route(target_count);
-            self.mover_group_model.check_mover();
-
+            record = self.mover_group_model.select_route(target_count, record);
             self.mover_group_model.initialize_mover();
+            
+                        println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
+                        println!("car_runtime:{} trian_runtime:{}", record.car_runtime, record.train_runtime);
+            
+            if day == 0{
+                best_record = record;
+                //best_ride = vec![record.count_car_ride, record.count_train_ride];
+                //best_runtime = vec![record.car_runtime, record.train_runtime];
+            }else if record.car_runtime + record.train_runtime < best_record.car_runtime + best_record.train_runtime {
+                best_day = day;
+                best_record = record;
+                //best_ride = vec![record.count_car_ride, record.count_train_ride];
+                //best_runtime = vec![record.car_runtime, record.train_runtime];
+            }
         }
+
+        println!("\nbest record \nday:{}",best_day);
+        println!("car_ride:{} train_ride:{}", best_record.count_car_ride, best_record.count_train_ride);
+        println!("car_runtime:{} trian_runtime{}", best_record.car_runtime, best_record.train_runtime);
     }
 
     fn cars_run(
@@ -109,5 +128,31 @@ impl SimulationModel{
             }
         }
         return train_mover_group;
+    }
+}
+
+pub struct SimulationRecord{
+    pub count_car_ride:   usize,
+    pub count_train_ride: usize,
+
+    pub count_car_mover:   usize,
+    pub count_train_mover: usize,
+
+    pub car_runtime:   u64,
+    pub train_runtime: u64,
+}
+
+impl SimulationRecord{
+    pub fn new() -> SimulationRecord{
+        let simulation_record = SimulationRecord{
+            count_car_ride: 0,
+            car_runtime: 0,
+            count_car_mover: 0,
+            count_train_ride: 0,
+            train_runtime: 0,
+            count_train_mover: 0,
+        };
+
+        return simulation_record
     }
 }

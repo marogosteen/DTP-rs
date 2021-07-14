@@ -1,5 +1,6 @@
 use std;
 use rand::Rng;
+use crate::models::simulation_mod;
 
 pub struct MoverGroupModel{
     pub model_item: Vec<MoverModel>,
@@ -67,27 +68,58 @@ impl MoverGroupModel{
         self.model_item = new_mover_group;
     }
 
-    pub fn select_route(&mut self, mut lisning_target_count: usize){
+    fn generate_target_id_list(
+        &self, 
+        lisner_id: usize, 
+        mut lisning_target_count: usize,
+        movers_count: usize,
+    ) -> Vec<usize>{
         lisning_target_count = std::cmp::min(lisning_target_count, self.model_item.len());
         let half: usize = lisning_target_count / 2;
+            
+        let shift = 
+            if lisner_id < half {
+                0
+            // 0originを考慮してmovers_count - 1
+            } else if lisner_id > movers_count - 1 - half{
+                movers_count - lisning_target_count
+            } else{
+                lisner_id - half
+            }; 
+
+        // 聞き込み件数が偶数でも，自身を含めた奇数にする．
+        let target_id_list: Vec<usize> = (shift .. half * 2 + 1 + shift).collect::<Vec<usize>>();
+
+        return target_id_list
+    }
+
+    pub fn select_route(
+        &mut self, lisning_target_count: usize, mut record: simulation_mod::SimulationRecord
+    ) -> simulation_mod::SimulationRecord{
         let movers_count: usize = self.model_item.len() as usize;
         let mut next_mover_group_model = self.model_item.clone();
 
         for lisner_id in 0..movers_count{
-            let shift = 
-                if lisner_id < half {
-                    0
-                // 0originを考慮してmovers_count - 1
-                } else if lisner_id > movers_count - 1 - half{
-                    movers_count - lisning_target_count
-                } else{
-                    lisner_id - half
-                }; 
-
-            // 聞き込み件数が偶数でも，自身を含めた奇数にする．
-            let target_id_list: Vec<usize> = (shift .. half * 2 + 1 + shift).collect::<Vec<usize>>();
+            let mover = &self.model_item[lisner_id];
             let mut first_mover_id: usize = lisner_id;
-            let mut first_mover_time: u64 = self.model_item[lisner_id].arrival_time - self.model_item[lisner_id].start_time;
+            let mut first_mover_time: u64 = mover.arrival_time - mover.start_time;
+
+            match mover.route{
+                Route::Car => {
+                    record.count_car_ride += mover.ride;
+                    record.car_runtime += mover.arrival_time - mover.start_time;
+                    record.count_car_mover += 1;
+                }
+                Route::Train => {
+                    record.count_train_ride += mover.ride;
+                    record.train_runtime += mover.arrival_time - mover.start_time;
+                    record.count_train_mover += 1;
+                }
+            }
+
+            let target_id_list: Vec<usize> = self.generate_target_id_list(
+                lisner_id, lisning_target_count, movers_count
+            );
 
             for target_id in target_id_list{
                 let run_time = self.model_item[target_id].arrival_time - self.model_item[target_id].start_time;
@@ -103,8 +135,12 @@ impl MoverGroupModel{
                 next_mover_group_model[lisner_id].route = self.model_item[first_mover_id].route.clone();
             }
         }
+        
+        record.car_runtime = (record.car_runtime as f64 / record.count_car_mover as f64) as u64;
+        record.train_runtime = (record.train_runtime as f64 / record.count_train_mover as f64) as u64;
 
         self.model_item = next_mover_group_model;
+        return record
     }
 
     pub fn initialize_mover(&mut self){
@@ -114,39 +150,20 @@ impl MoverGroupModel{
             self.model_item[id].velocity = 0.0;
         }
     }
-
-    pub fn check_mover(&self){
-        let mut count_route_car = 0;
-        let mut count_route_train = 0;
-        for id in 0..self.model_item.len(){
-            let mover = &self.model_item[id];
-            /*
-            println!(
-                "id:{} \trun time:{} \tstart:{} \tarrival:{} \troute:{:?}",
-                mover.id, mover.arrival_time - mover.start_time, mover.start_time, mover.arrival_time, mover.route
-            );
-            */
-
-            match mover.route{
-                Route::Car => count_route_car += mover.ride,
-                Route::Train => count_route_train += mover.ride,
-            }
-        }
-        println!("car:{} train:{}",count_route_car,count_route_train);
-    }
 }
 
 #[derive(Debug,Clone)]
 pub struct MoverModel{
-    pub id:           usize,
-    pub ride:     usize,
+    pub id:   usize,
+    pub ride: usize,
+
     pub start_time:   u64,
     pub arrival_time: u64,
     
     pub route: Route,
     
-    pub location:    f64,
-    pub velocity:    f64,
+    pub location: f64,
+    pub velocity: f64,
 }
 
 impl MoverModel{
@@ -177,8 +194,8 @@ pub enum Route{
 impl Route{
     pub fn get_route_length(&self) -> f64{
         let route_length: f64 = match self {
-            Self::Car => 10000.0,
-            Self::Train => 10000.0,
+            Self::Car => 11400.0,
+            Self::Train => 11400.0,
         };
         return route_length;
     }

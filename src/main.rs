@@ -1,15 +1,15 @@
 mod models;
 
 fn main(){
-    const PEOPLE: usize = 102;
+    const PEOPLE: usize = 2500;
     const TIME_INTERVAL: u64 = 1;
 
     const CAR_LANE: i32 = 1;
     const CAR_MAX_VELOCITY: f64 = 51.1;
     
-    const TRAIN_CAPACITY: usize = 150;
+    const TRAIN_CAPACITY: usize = 100;
     const TRAIN_VELOCITY: f64 = 31.1;
-    const DAYS: usize = 50;
+    const DAYS: usize = 100;
 
     let mover_group_model = models::mover_group_mod::MoverGroupModel::new(PEOPLE);
 
