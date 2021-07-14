@@ -42,7 +42,7 @@ impl SimulationModel{
                 //best_ride = vec![record.count_car_ride, record.count_train_ride];
                 //best_runtime = vec![record.car_runtime, record.train_runtime];
             }else if record.car_runtime + record.train_runtime < best_record.car_runtime + best_record.train_runtime {
-                best_day = day;
+                best_day = day + 1;
                 best_record = record;
                 //best_ride = vec![record.count_car_ride, record.count_train_ride];
                 //best_runtime = vec![record.car_runtime, record.train_runtime];
