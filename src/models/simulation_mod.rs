@@ -11,13 +11,11 @@ pub struct SimulationModel{
 
 impl SimulationModel{
     pub fn run(mut self, days: usize){
-        let mut best_day: usize = 0;
+        let mut best_day: usize = 1;
         let mut best_record = SimulationRecord::new();
-        //let mut best_ride:Vec<usize> = vec![std::usize::MAX,std::usize::MAX];
-        //let mut best_runtime:Vec<u64> = vec![std::u64::MAX,std::u64::MAX];
 
-        for day in 0..days{ 
-            println!("\nday: {}",day + 1);
+        for day in 1..=days{ 
+            println!("\nday: {}",day);
             let mut record = SimulationRecord::new();
 
             let (mut car_mover_group, mut train_mover_group) 
@@ -31,27 +29,24 @@ impl SimulationModel{
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
             
             let target_count = 3;
-            record = self.mover_group_model.select_route(target_count, record);
-            self.mover_group_model.initialize_mover();
+            record = self.mover_group_model.select_route_and_report(target_count, record);
             
-                        println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
-                        println!("car_runtime:{} trian_runtime:{}", record.car_runtime, record.train_runtime);
+            println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
+            println!("car_runtime:{} trian_runtime:{}", record.car_runtime, record.train_runtime);
             
-            if day == 0{
+            if day == 1{
                 best_record = record;
-                //best_ride = vec![record.count_car_ride, record.count_train_ride];
-                //best_runtime = vec![record.car_runtime, record.train_runtime];
             }else if record.car_runtime + record.train_runtime < best_record.car_runtime + best_record.train_runtime {
-                best_day = day + 1;
+                best_day = day;
                 best_record = record;
-                //best_ride = vec![record.count_car_ride, record.count_train_ride];
-                //best_runtime = vec![record.car_runtime, record.train_runtime];
             }
+            
+            self.mover_group_model.initialize_mover();
         }
 
         println!("\nbest record \nday:{}",best_day);
         println!("car_ride:{} train_ride:{}", best_record.count_car_ride, best_record.count_train_ride);
-        println!("car_runtime:{} trian_runtime{}", best_record.car_runtime, best_record.train_runtime);
+        println!("car_runtime:{} trian_runtime:{}", best_record.car_runtime, best_record.train_runtime);
     }
 
     fn cars_run(
@@ -98,27 +93,37 @@ impl SimulationModel{
         mut train_mover_group:Vec<mover_group_mod::MoverModel>,
     ) -> Vec<mover_group_mod::MoverModel>{
         let route_length = train_mover_group[0].route.get_route_length();
+        let ride_rate = mover_group_mod::MoverGroupModel::RIDE_RATE;
+
         let mut passengers: usize = 0;
         let mut first_passenger_id: usize = 0;
-
-        for current_mover_id in 0..train_mover_group.len(){
-            passengers += train_mover_group[current_mover_id].ride;
+        let mut current_mover_id = 0;
+        //for current_mover_id in 0..train_mover_group.len(){
+        loop {
+            //passengers += train_mover_group[current_mover_id].ride;
+            current_mover_id += 1;
+            passengers += (ride_rate * current_mover_id as f64 - ride_rate * (current_mover_id - 1) as f64).round() as usize;
 
             if passengers >= self.train_capacity{
+                current_mover_id = std::cmp::min(current_mover_id, train_mover_group.len() - 1);
                 //一車両に乗った客の到着時間は同じになる
                 let arrival_time = 
                     train_mover_group[current_mover_id].start_time as f64 + route_length / self.train_velocity * 3.6;
 
-                for id in first_passenger_id..=current_mover_id{
+                for id in first_passenger_id ..= current_mover_id{
                     train_mover_group[id].arrival_time = arrival_time as u64;
                     train_mover_group[id].location = route_length;
                     train_mover_group[id].velocity = self.train_velocity;
                 }
                 passengers = 0;
                 first_passenger_id = current_mover_id + 1;
+
+                if current_mover_id >= train_mover_group.len() - 1{
+                    break
+                }
             }
         }
-        if passengers > 0{
+        /*if passengers > 0{
             //一車両に乗った客の到着時間は同じになる
             let arrival_time = train_mover_group.last().unwrap().start_time as f64 + route_length / self.train_velocity * 3.6;
             for id in first_passenger_id..train_mover_group.len(){
@@ -126,7 +131,8 @@ impl SimulationModel{
                 train_mover_group[id].location = route_length;
                 train_mover_group[id].velocity = self.train_velocity;
             }
-        }
+        }*/
+
         return train_mover_group;
     }
 }

@@ -7,16 +7,28 @@ pub struct MoverGroupModel{
 }
 
 impl MoverGroupModel{
-    const RIDE_RATE: f64 = 1.43;
+    pub const RIDE_RATE: f64 = 1.43;
 
     pub fn new(people: usize) -> MoverGroupModel{
         let mut mover_group_model = MoverGroupModel{
             model_item: Vec::new()
         };
 
-        let ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people);
-        for (id,ride) in ride_vec.into_iter().enumerate(){
-            mover_group_model.model_item.push(MoverModel::new(id,ride));
+        let mut id = 0;
+        let ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people / 2);
+        let count_mover = ride_vec.len();
+        for ride in ride_vec.into_iter(){
+            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
+            mover_group_model.model_item.push(MoverModel::new(id, ride, start_interval));
+            id += 1;
+
+            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
+            mover_group_model.model_item.push(MoverModel::new(id, ride, start_interval));
+            id += 1;
+        }
+        if people % 2 == 1{
+            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
+            mover_group_model.model_item.push(MoverModel::new(id, 1, start_interval));
         }
 
         return mover_group_model;
@@ -71,18 +83,18 @@ impl MoverGroupModel{
     fn generate_target_id_list(
         &self, 
         lisner_id: usize, 
-        mut lisning_target_count: usize,
+        mut lisning_target: usize,
         movers_count: usize,
     ) -> Vec<usize>{
-        lisning_target_count = std::cmp::min(lisning_target_count, self.model_item.len());
-        let half: usize = lisning_target_count / 2;
+        lisning_target = std::cmp::min(lisning_target, self.model_item.len());
+        let half: usize = lisning_target / 2;
             
         let shift = 
             if lisner_id < half {
                 0
             // 0originを考慮してmovers_count - 1
             } else if lisner_id > movers_count - 1 - half{
-                movers_count - lisning_target_count
+                movers_count - lisning_target
             } else{
                 lisner_id - half
             }; 
@@ -93,8 +105,8 @@ impl MoverGroupModel{
         return target_id_list
     }
 
-    pub fn select_route(
-        &mut self, lisning_target_count: usize, mut record: simulation_mod::SimulationRecord
+    pub fn select_route_and_report(
+        &mut self, lisning_target: usize, mut record: simulation_mod::SimulationRecord
     ) -> simulation_mod::SimulationRecord{
         let movers_count: usize = self.model_item.len() as usize;
         let mut next_mover_group_model = self.model_item.clone();
@@ -118,7 +130,7 @@ impl MoverGroupModel{
             }
 
             let target_id_list: Vec<usize> = self.generate_target_id_list(
-                lisner_id, lisning_target_count, movers_count
+                lisner_id, lisning_target, movers_count
             );
 
             for target_id in target_id_list{
@@ -167,7 +179,7 @@ pub struct MoverModel{
 }
 
 impl MoverModel{
-    pub fn new(id: usize, ride: usize) -> MoverModel{
+    pub fn new(id: usize, ride: usize, start_interval: u64) -> MoverModel{
         let mover_model = MoverModel{
             id: id,
             route: match std::cmp::min(id%2,1){
@@ -175,7 +187,7 @@ impl MoverModel{
                 _ => Route::Train,
             },
             ride: ride,
-            start_time: id as u64,
+            start_time: start_interval,
             arrival_time: std::u64::MAX,
             location: 0.0,
             velocity: 0.0,
