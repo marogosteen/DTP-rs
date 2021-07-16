@@ -98,9 +98,8 @@ impl SimulationModel{
         let mut passengers: usize = 0;
         let mut first_passenger_id: usize = 0;
         let mut current_mover_id = 0;
-        //for current_mover_id in 0..train_mover_group.len(){
+
         loop {
-            //passengers += train_mover_group[current_mover_id].ride;
             current_mover_id += 1;
             passengers += (ride_rate * current_mover_id as f64 - ride_rate * (current_mover_id - 1) as f64).round() as usize;
 
@@ -123,15 +122,6 @@ impl SimulationModel{
                 }
             }
         }
-        /*if passengers > 0{
-            //一車両に乗った客の到着時間は同じになる
-            let arrival_time = train_mover_group.last().unwrap().start_time as f64 + route_length / self.train_velocity * 3.6;
-            for id in first_passenger_id..train_mover_group.len(){
-                train_mover_group[id].arrival_time = arrival_time as u64;
-                train_mover_group[id].location = route_length;
-                train_mover_group[id].velocity = self.train_velocity;
-            }
-        }*/
 
         return train_mover_group;
     }
