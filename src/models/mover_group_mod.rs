@@ -14,21 +14,22 @@ impl MoverGroupModel{
             model_item: Vec::new()
         };
 
-        let mut id = 0;
-        let ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people / 2);
-        let count_mover = ride_vec.len();
-        for ride in ride_vec.into_iter(){
-            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
-            mover_group_model.model_item.push(MoverModel::new(id, ride, start_interval));
-            id += 1;
+        let train_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people / 2);
+        let car_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people - people / 2);
 
-            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
-            mover_group_model.model_item.push(MoverModel::new(id, ride, start_interval));
-            id += 1;
-        }
-        if people % 2 == 1{
-            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
-            mover_group_model.model_item.push(MoverModel::new(id, 1, start_interval));
+        let count_mover = car_ride_vec.len() + train_ride_vec.len();
+        let mut car_vec_index = 0;
+        let mut train_vec_index = 0;
+        for id in 0..count_mover{
+            if id % 2 == 0{
+                let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
+                mover_group_model.model_item.push(MoverModel::new(id, car_ride_vec[car_vec_index], start_interval));    
+                car_vec_index += 1;
+            }else{
+                let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
+                mover_group_model.model_item.push(MoverModel::new(id, train_ride_vec[train_vec_index], start_interval));
+                train_vec_index += 1;
+            }
         }
 
         return mover_group_model;

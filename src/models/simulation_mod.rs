@@ -27,12 +27,17 @@ impl SimulationModel{
                 train_mover_group = self.trains_run(train_mover_group);
             };
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
-            
+
             let target_count = 3;
             record = self.mover_group_model.select_route_and_report(target_count, record);
             
             println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
-            println!("car_runtime:{} trian_runtime:{}", record.car_runtime, record.train_runtime);
+            println!(
+                "car_runtime:{} trian_runtime:{} sum{}", 
+                record.car_runtime, 
+                record.train_runtime, 
+                record.car_runtime + record.train_runtime
+            );
             
             if day == 1{
                 best_record = record;
@@ -56,11 +61,12 @@ impl SimulationModel{
         car_mover_group[0].velocity = self.car_max_velocity;
         let mut time: u64 = 0;
         let route_length = car_mover_group[0].route.get_route_length();
+        let mut arrival_id: usize = 0;
 
         while car_mover_group.last().unwrap().arrival_time == std::u64::MAX {
             time += self.time_interval;
 
-            for car_id in 0..car_mover_group.len(){
+            for car_id in arrival_id..car_mover_group.len(){
                 if car_mover_group[car_id].start_time <= time{
                     //locationは前の時刻のvelocityを用い，velocityは現在のlocationを用いる
                     let location: f64 
@@ -68,7 +74,7 @@ impl SimulationModel{
                     car_mover_group[car_id].location = location;
 
                     let velocity: f64 = 
-                        if car_id == 0{
+                        if car_id == arrival_id{
                             51.1
                         }else{
                             let traffic_dencity: f64 
@@ -81,6 +87,7 @@ impl SimulationModel{
                     if car_mover_group[car_id].location >= route_length{
                         car_mover_group[car_id].arrival_time
                             = std::cmp::min(time,car_mover_group[car_id].arrival_time);
+                        arrival_id = car_id + 1;
                     }
                 }
             }
