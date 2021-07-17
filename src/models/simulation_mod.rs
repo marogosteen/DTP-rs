@@ -33,7 +33,7 @@ impl SimulationModel{
             
             println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
             println!(
-                "car_runtime:{} trian_runtime:{} sum{}", 
+                "car_runtime:{} trian_runtime:{} sum_time:{}", 
                 record.car_runtime, 
                 record.train_runtime, 
                 record.car_runtime + record.train_runtime
@@ -51,7 +51,12 @@ impl SimulationModel{
 
         println!("\nbest record \nday:{}",best_day);
         println!("car_ride:{} train_ride:{}", best_record.count_car_ride, best_record.count_train_ride);
-        println!("car_runtime:{} trian_runtime:{}", best_record.car_runtime, best_record.train_runtime);
+        println!(
+            "car_runtime:{} trian_runtime:{} sum_time:{}", 
+            best_record.car_runtime, 
+            best_record.train_runtime, 
+            best_record.car_runtime + best_record.train_runtime
+        );
     }
 
     fn cars_run(
