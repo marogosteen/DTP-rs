@@ -20,49 +20,38 @@ impl SimulationModel{
 
             let (mut car_mover_group, mut train_mover_group) 
                 = self.mover_group_model.devide_model();            
-            if car_mover_group.len() != 0{
-                car_mover_group = self.cars_run(car_mover_group);
-            };
-            if train_mover_group.len() != 0{
-                train_mover_group = self.trains_run(train_mover_group);
-            };
+            car_mover_group = self.cars_run(car_mover_group);
+            train_mover_group = self.trains_run(train_mover_group);
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
 
-            let target_count = 3;
-            record = self.mover_group_model.select_route_and_report(target_count, record);
-            
-            println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
-            println!(
-                "car_runtime:{} trian_runtime:{} sum_time:{}", 
-                record.car_runtime, 
-                record.train_runtime, 
-                record.car_runtime + record.train_runtime
-            );
-            
+            let lisning_target_count = 3;
+            record = self.mover_group_model.select_route_and_report(lisning_target_count, record);
+            write_log(&record);
+
             if day == 1{
-                best_record = record;
+                best_record = record.clone();
             }else if record.car_runtime + record.train_runtime < best_record.car_runtime + best_record.train_runtime {
                 best_day = day;
-                best_record = record;
+                best_record = record.clone();
             }
-            
-            self.mover_group_model.initialize_mover();
+
+            self.mover_group_model.initialize_mover(
+                self.mover_group_model.count_route_ride(mover_group_mod::Route::Car), self.mover_group_model.count_route_ride(mover_group_mod::Route::Train)
+            );
         }
 
         println!("\nbest record \nday:{}",best_day);
-        println!("car_ride:{} train_ride:{}", best_record.count_car_ride, best_record.count_train_ride);
-        println!(
-            "car_runtime:{} trian_runtime:{} sum_time:{}", 
-            best_record.car_runtime, 
-            best_record.train_runtime, 
-            best_record.car_runtime + best_record.train_runtime
-        );
+        write_log(&best_record);
     }
 
     fn cars_run(
         &self, 
         mut car_mover_group: Vec<mover_group_mod::MoverModel>,
     ) -> Vec<mover_group_mod::MoverModel>{
+        if car_mover_group.len() == 0{
+            return car_mover_group
+        }
+
         car_mover_group[0].velocity = self.car_max_velocity;
         let mut time: u64 = 0;
         let route_length = car_mover_group[0].route.get_route_length();
@@ -104,6 +93,10 @@ impl SimulationModel{
         &self, 
         mut train_mover_group:Vec<mover_group_mod::MoverModel>,
     ) -> Vec<mover_group_mod::MoverModel>{
+        if train_mover_group.len() == 0{
+            return train_mover_group
+        }
+
         let route_length = train_mover_group[0].route.get_route_length();
         let ride_rate = mover_group_mod::MoverGroupModel::RIDE_RATE;
 
@@ -139,6 +132,7 @@ impl SimulationModel{
     }
 }
 
+#[derive(Clone)]
 pub struct SimulationRecord{
     pub count_car_ride:   usize,
     pub count_train_ride: usize,
@@ -163,4 +157,14 @@ impl SimulationRecord{
 
         return simulation_record
     }
+}
+
+fn write_log(record: &SimulationRecord){
+    println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
+    println!(
+        "car_runtime:{} trian_runtime:{} \nsum_time:{}", 
+        record.car_runtime, 
+        record.train_runtime, 
+        record.car_runtime + record.train_runtime
+    );
 }
