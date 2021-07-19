@@ -23,7 +23,9 @@ impl SimulationModel{
             car_mover_group = self.cars_run(car_mover_group);
             train_mover_group = self.trains_run(train_mover_group);
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
-
+            for mover in &self.mover_group_model.model_item{
+                println!("{:?}",mover);
+            }
             let lisning_target_count = 3;
             record = self.mover_group_model.select_route_and_report(lisning_target_count, record);
             write_log(&record);

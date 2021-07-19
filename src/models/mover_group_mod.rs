@@ -14,33 +14,50 @@ impl MoverGroupModel{
             model_item: Vec::new()
         };
 
-        let car_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people - people / 2);
-        let mut car_ride_vec_index: usize = 0;
-        let train_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people / 2);
-        let mut train_ride_vec_index: usize = 0;
+        let train_people: usize = people / 10 * 9;
+        let car_people: usize = people - train_people;
 
-        let count_mover = car_ride_vec.len() + train_ride_vec.len();
-        for id in 0..count_mover{
-            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
+        let many_route: Route;
+        let less_route: Route;
+        let many_ride_vec: Vec<usize>;
+        let less_ride_vec: Vec<usize>;
+        let mut many_index = 0;
+        let mut less_index = 0;
+
+        if car_people > train_people{
+            many_route = Route::Car;
+            less_route = Route::Train;
+            many_ride_vec = MoverGroupModel::generate_ride_vec(car_people);
+            less_ride_vec = MoverGroupModel::generate_ride_vec(train_people);
+        }else{
+            many_route = Route::Train;
+            less_route = Route::Car;
+            many_ride_vec = MoverGroupModel::generate_ride_vec(train_people);
+            less_ride_vec = MoverGroupModel::generate_ride_vec(car_people);
+        }
+
+        let sum_mover = many_ride_vec.len() + less_ride_vec.len();
+        let rate = less_ride_vec.len() as f64 / many_ride_vec.len() as f64;
+        let mut counter: f64 = rate / 2.0;
+
+        for id in 0..sum_mover{
+            let start_interval: u64 = (3600 * id / (sum_mover - 1)) as u64;
             let route: Route;
             let ride: usize;
-
-            match id % 2 {
-                0 => {
-                    route = Route::Car;
-                    ride = car_ride_vec[car_ride_vec_index];
-                    car_ride_vec_index += 1;
-                }
-                _ => {
-                    route = Route::Train;
-                    ride = train_ride_vec[train_ride_vec_index];
-                    train_ride_vec_index += 1;
-                }
-            };
+            if counter < 1.0{
+                route = many_route.clone();
+                ride = many_ride_vec[many_index];
+                many_index += 1;
+                counter += rate;
+            }
+            else {
+                route = less_route.clone();
+                ride = less_ride_vec[less_index];
+                less_index += 1;
+                counter -= 1.0;
+            }
             mover_group_model.model_item.push(MoverModel::new(id, route, ride, start_interval));
         }
-        mover_group_model.initialize_mover();
-
         return mover_group_model;
     }
 
@@ -202,7 +219,6 @@ impl MoverModel{
             location: 0.0,
             velocity: 0.0,
         };
-
         return mover_model;
     }
 }
