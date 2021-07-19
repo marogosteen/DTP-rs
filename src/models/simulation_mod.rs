@@ -29,15 +29,13 @@ impl SimulationModel{
             write_log(&record);
 
             if day == 1{
-                best_record = record.clone();
+                best_record = record;
             }else if record.car_runtime + record.train_runtime < best_record.car_runtime + best_record.train_runtime {
                 best_day = day;
-                best_record = record.clone();
+                best_record = record;
             }
 
-            self.mover_group_model.initialize_mover(
-                self.mover_group_model.count_route_ride(mover_group_mod::Route::Car), self.mover_group_model.count_route_ride(mover_group_mod::Route::Train)
-            );
+            self.mover_group_model.initialize_mover();
         }
 
         println!("\nbest record \nday:{}",best_day);
@@ -132,7 +130,6 @@ impl SimulationModel{
     }
 }
 
-#[derive(Clone)]
 pub struct SimulationRecord{
     pub count_car_ride:   usize,
     pub count_train_ride: usize,

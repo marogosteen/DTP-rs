@@ -14,17 +14,32 @@ impl MoverGroupModel{
             model_item: Vec::new()
         };
 
-        let train_people = people / 2;
-        let car_people = people - people / 2;
-        let car_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(car_people);
-        let train_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(train_people);
+        let car_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people - people / 2);
+        let mut car_ride_vec_index: usize = 0;
+        let train_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people / 2);
+        let mut train_ride_vec_index: usize = 0;
 
         let count_mover = car_ride_vec.len() + train_ride_vec.len();
         for id in 0..count_mover{
             let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
-            mover_group_model.model_item.push(MoverModel::new(id, Route::Car, 1, start_interval));    
+            let route: Route;
+            let ride: usize;
+
+            match id % 2 {
+                0 => {
+                    route = Route::Car;
+                    ride = car_ride_vec[car_ride_vec_index];
+                    car_ride_vec_index += 1;
+                }
+                _ => {
+                    route = Route::Train;
+                    ride = train_ride_vec[train_ride_vec_index];
+                    train_ride_vec_index += 1;
+                }
+            };
+            mover_group_model.model_item.push(MoverModel::new(id, route, ride, start_interval));
         }
-        mover_group_model.initialize_mover(car_people, train_people);
+        mover_group_model.initialize_mover();
 
         return mover_group_model;
     }
@@ -103,8 +118,9 @@ impl MoverGroupModel{
     pub fn select_route_and_report(
         &mut self, lisning_target: usize, mut record: simulation_mod::SimulationRecord
     ) -> simulation_mod::SimulationRecord{
-        let movers_count: usize = self.model_item.len() as usize;
         let mut next_mover_group_model = self.model_item.clone();
+        
+        let movers_count: usize = self.model_item.len() as usize;
 
         for lisner_id in 0..movers_count{
             let mover = &self.model_item[lisner_id];
@@ -151,61 +167,12 @@ impl MoverGroupModel{
         return record
     }
 
-    pub fn initialize_mover(&mut self, car_people: usize , train_people: usize){
-
-        let car_ride_vec = MoverGroupModel::generate_ride_vec(car_people);
-        let train_ride_vec = MoverGroupModel::generate_ride_vec(train_people);
-
-        let many_route: Route;
-        let less_route: Route;
-        let many_ride_vec: Vec<usize>;
-        let less_ride_vec: Vec<usize>;
-
-        if car_ride_vec.len() > train_ride_vec.len(){
-            many_route = Route::Car;
-            less_route = Route::Train;
-            many_ride_vec = car_ride_vec;
-            less_ride_vec = train_ride_vec;
-        }else{
-            many_route = Route::Train;
-            less_route = Route::Car;
-            many_ride_vec = train_ride_vec;
-            less_ride_vec = car_ride_vec;
-        }
-
-        let rate = less_ride_vec.len() as f64 / many_ride_vec.len() as f64;
-        let mut many_count = 0;
-        let mut less_count = 0;
-        let mut counter: f64 = rate / 2.0;
-
+    pub fn initialize_mover(&mut self){
         for id in 0..self.model_item.len(){
-            if counter < 1.0{
-                counter += rate;
-                self.model_item[id].route = many_route.clone();
-                self.model_item[id].ride = many_ride_vec[many_count];
-                many_count += 1;
-            }
-            else {
-                counter -= 1.0;
-                self.model_item[id].route = less_route.clone();
-                self.model_item[id].ride = less_ride_vec[less_count];
-                less_count += 1;
-            }
             self.model_item[id].arrival_time = std::u64::MAX;
             self.model_item[id].location = 0.0;
             self.model_item[id].velocity = 0.0;
         }
-    }
-
-    pub fn count_route_ride(&self, route: Route) -> usize{
-        let route_id = route.get_route_id();
-        let mut count_route_ride = 0;
-        for model in self.model_item.iter(){
-            if model.route.get_route_id() == route_id{
-                count_route_ride += model.ride;
-            }
-        }
-        return count_route_ride
     }
 }
 
@@ -253,13 +220,5 @@ impl Route{
             Self::Train => 11400.0,
         };
         return route_length;
-    }
-
-    pub fn get_route_id(&self) -> usize{
-        let route_id: usize = match self{
-            Self::Car => 1,
-            Self::Train => 2,
-        };
-        return route_id
     }
 }
