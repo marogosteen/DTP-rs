@@ -9,7 +9,7 @@ fn main(){
     const CAR_MAX_VELOCITY: f64 = 51.1;
     
     const TRAIN_CAPACITY: usize = 100;
-    const TRAIN_VELOCITY: f64 = 31.1;
+    const TRAIN_VELOCITY: f64 = 31.1 ;
 
     let mover_group_model = models::mover_group_mod::MoverGroupModel::new(PEOPLE);
 

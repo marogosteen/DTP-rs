@@ -14,23 +14,32 @@ impl MoverGroupModel{
             model_item: Vec::new()
         };
 
-        let train_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people / 2);
         let car_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people - people / 2);
+        let mut car_ride_vec_index: usize = 0;
+        let train_ride_vec: Vec<usize> = MoverGroupModel::generate_ride_vec(people / 2);
+        let mut train_ride_vec_index: usize = 0;
 
         let count_mover = car_ride_vec.len() + train_ride_vec.len();
-        let mut car_vec_index = 0;
-        let mut train_vec_index = 0;
         for id in 0..count_mover{
-            if id % 2 == 0{
-                let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
-                mover_group_model.model_item.push(MoverModel::new(id, car_ride_vec[car_vec_index], start_interval));    
-                car_vec_index += 1;
-            }else{
-                let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
-                mover_group_model.model_item.push(MoverModel::new(id, train_ride_vec[train_vec_index], start_interval));
-                train_vec_index += 1;
-            }
+            let start_interval: u64 = (3600 * id / (count_mover - 1)) as u64;
+            let route: Route;
+            let ride: usize;
+
+            match id % 2 {
+                0 => {
+                    route = Route::Car;
+                    ride = car_ride_vec[car_ride_vec_index];
+                    car_ride_vec_index += 1;
+                }
+                _ => {
+                    route = Route::Train;
+                    ride = train_ride_vec[train_ride_vec_index];
+                    train_ride_vec_index += 1;
+                }
+            };
+            mover_group_model.model_item.push(MoverModel::new(id, route, ride, start_interval));
         }
+        mover_group_model.initialize_mover();
 
         return mover_group_model;
     }
@@ -109,8 +118,9 @@ impl MoverGroupModel{
     pub fn select_route_and_report(
         &mut self, lisning_target: usize, mut record: simulation_mod::SimulationRecord
     ) -> simulation_mod::SimulationRecord{
-        let movers_count: usize = self.model_item.len() as usize;
         let mut next_mover_group_model = self.model_item.clone();
+        
+        let movers_count: usize = self.model_item.len() as usize;
 
         for lisner_id in 0..movers_count{
             let mover = &self.model_item[lisner_id];
@@ -153,6 +163,7 @@ impl MoverGroupModel{
         record.train_runtime = (record.train_runtime as f64 / record.count_train_mover as f64) as u64;
 
         self.model_item = next_mover_group_model;
+
         return record
     }
 
@@ -180,13 +191,11 @@ pub struct MoverModel{
 }
 
 impl MoverModel{
-    pub fn new(id: usize, ride: usize, start_interval: u64) -> MoverModel{
+    pub fn new(
+        id: usize, route: Route, ride: usize, start_interval: u64) -> MoverModel{
         let mover_model = MoverModel{
             id: id,
-            route: match std::cmp::min(id%2,1){
-                0 => Route::Car,
-                _ => Route::Train,
-            },
+            route: route,
             ride: ride,
             start_time: start_interval,
             arrival_time: std::u64::MAX,
