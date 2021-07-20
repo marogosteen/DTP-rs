@@ -1,5 +1,8 @@
 mod models;
 
+use crate::models::mover_group::MoverGroup;
+use crate::models::simulation::SimulationModel;
+
 fn main(){
     const PEOPLE: usize = 2500;
     const TIME_INTERVAL: u64 = 1;
@@ -11,9 +14,9 @@ fn main(){
     const TRAIN_CAPACITY: usize = 100;
     const TRAIN_VELOCITY: f64 = 31.1 ;
 
-    let mover_group_model = models::mover_group::MoverGroupModel::new(PEOPLE);
+    let mover_group_model = MoverGroup::new(PEOPLE);
 
-    let simuration_model = models::simulation::SimulationModel{
+    let simuration_model = SimulationModel{
         mover_group_model: mover_group_model,
         time_interval: TIME_INTERVAL,
         car_lane: CAR_LANE as f64,

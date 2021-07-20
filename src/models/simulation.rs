@@ -1,9 +1,9 @@
-use crate::models::mover_group;
-use crate::models::mover_unit;
-use crate::models::record;
+use crate::models::mover_group::MoverGroup;
+use crate::models::mover_unit::MoverUnit;
+use crate::models::record::Record;
 
 pub struct SimulationModel{
-    pub mover_group_model: mover_group::MoverGroupModel,
+    pub mover_group_model: MoverGroup,
     pub time_interval: u64,
     pub car_lane: f64,
     pub car_max_velocity: f64,
@@ -14,11 +14,11 @@ pub struct SimulationModel{
 impl SimulationModel{
     pub fn run(mut self, days: usize){
         let mut best_day: usize = 1;
-        let mut best_record = record::Record::new();
+        let mut best_record = Record::new();
 
         for day in 1..=days{ 
             println!("\nday: {}",day);
-            let mut record = record::Record::new();
+            let mut record = Record::new();
 
             let (mut car_mover_group, mut train_mover_group) 
                 = self.mover_group_model.devide_model();            
@@ -46,8 +46,8 @@ impl SimulationModel{
 
     fn cars_run(
         &self, 
-        mut car_mover_group: Vec<mover_unit::MoverModel>,
-    ) -> Vec<mover_unit::MoverModel>{
+        mut car_mover_group: Vec<MoverUnit>,
+    ) -> Vec<MoverUnit>{
         if car_mover_group.len() == 0{
             return car_mover_group
         }
@@ -91,14 +91,14 @@ impl SimulationModel{
 
     fn trains_run(
         &self, 
-        mut train_mover_group:Vec<mover_unit::MoverModel>,
-    ) -> Vec<mover_unit::MoverModel>{
+        mut train_mover_group:Vec<MoverUnit>,
+    ) -> Vec<MoverUnit>{
         if train_mover_group.len() == 0{
             return train_mover_group
         }
 
         let route_length = train_mover_group[0].route.get_route_length();
-        let ride_rate = mover_group::MoverGroupModel::RIDE_RATE;
+        let ride_rate = MoverGroup::RIDE_RATE;
 
         let mut passengers: usize = 0;
         let mut first_passenger_id: usize = 0;

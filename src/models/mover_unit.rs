@@ -1,5 +1,5 @@
 #[derive(Debug,Clone)]
-pub struct MoverModel{
+pub struct MoverUnit{
     pub id:   usize,
     pub ride: usize,
 
@@ -12,10 +12,10 @@ pub struct MoverModel{
     pub velocity: f64,
 }
 
-impl MoverModel{
+impl MoverUnit{
     pub fn new(
-        id: usize, route: Route, ride: usize, start_interval: u64) -> MoverModel{
-        let mover_model = MoverModel{
+        id: usize, route: Route, ride: usize, start_interval: u64) -> MoverUnit{
+        let mover_model = MoverUnit{
             id: id,
             route: route,
             ride: ride,
