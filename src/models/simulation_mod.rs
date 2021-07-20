@@ -1,4 +1,5 @@
 use crate::models::mover_group_mod;
+use crate::models::record_mod;
 
 pub struct SimulationModel{
     pub mover_group_model: mover_group_mod::MoverGroupModel,
@@ -12,23 +13,21 @@ pub struct SimulationModel{
 impl SimulationModel{
     pub fn run(mut self, days: usize){
         let mut best_day: usize = 1;
-        let mut best_record = SimulationRecord::new();
+        let mut best_record = record_mod::SimulationRecord::new();
 
         for day in 1..=days{ 
             println!("\nday: {}",day);
-            let mut record = SimulationRecord::new();
+            let mut record = record_mod::SimulationRecord::new();
 
             let (mut car_mover_group, mut train_mover_group) 
                 = self.mover_group_model.devide_model();            
             car_mover_group = self.cars_run(car_mover_group);
             train_mover_group = self.trains_run(train_mover_group);
             self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
-            for mover in &self.mover_group_model.model_item{
-                println!("{:?}",mover);
-            }
+
             let lisning_target_count = 3;
             record = self.mover_group_model.select_route_and_report(lisning_target_count, record);
-            write_log(&record);
+            record.write_log();
 
             if day == 1{
                 best_record = record;
@@ -41,7 +40,7 @@ impl SimulationModel{
         }
 
         println!("\nbest record \nday:{}",best_day);
-        write_log(&best_record);
+        best_record.write_log();
     }
 
     fn cars_run(
@@ -132,7 +131,7 @@ impl SimulationModel{
     }
 }
 
-pub struct SimulationRecord{
+/*pub struct SimulationRecord{
     pub count_car_ride:   usize,
     pub count_train_ride: usize,
 
@@ -156,9 +155,9 @@ impl SimulationRecord{
 
         return simulation_record
     }
-}
+}*/
 
-fn write_log(record: &SimulationRecord){
+/*fn write_log(record: &SimulationRecord){
     println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
     println!(
         "car_runtime:{} trian_runtime:{} \nsum_time:{}", 
@@ -166,4 +165,4 @@ fn write_log(record: &SimulationRecord){
         record.train_runtime, 
         record.car_runtime + record.train_runtime
     );
-}
+}*/

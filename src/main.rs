@@ -3,7 +3,7 @@ mod models;
 fn main(){
     const PEOPLE: usize = 2500;
     const TIME_INTERVAL: u64 = 1;
-    const DAYS: usize = 2;
+    const DAYS: usize = 100;
 
     const CAR_LANE: i32 = 1;
     const CAR_MAX_VELOCITY: f64 = 51.1;

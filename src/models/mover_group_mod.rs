@@ -1,6 +1,5 @@
-use std;
 use rand::Rng;
-use crate::models::simulation_mod;
+use crate::models::record_mod;
 
 pub struct MoverGroupModel{
     pub model_item: Vec<MoverModel>,
@@ -133,8 +132,8 @@ impl MoverGroupModel{
     }
 
     pub fn select_route_and_report(
-        &mut self, lisning_target: usize, mut record: simulation_mod::SimulationRecord
-    ) -> simulation_mod::SimulationRecord{
+        &mut self, lisning_target: usize, mut record: record_mod::SimulationRecord
+    ) -> record_mod::SimulationRecord{
         let mut next_mover_group_model = self.model_item.clone();
         
         let movers_count: usize = self.model_item.len() as usize;
