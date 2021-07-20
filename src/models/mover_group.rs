@@ -1,8 +1,9 @@
 use rand::Rng;
-use crate::models::record_mod;
+use crate::models::mover_unit;
+use crate::models::record;
 
 pub struct MoverGroupModel{
-    pub model_item: Vec<MoverModel>,
+    pub model_item: Vec<mover_unit::MoverModel>,
 }
 
 impl MoverGroupModel{
@@ -16,21 +17,21 @@ impl MoverGroupModel{
         let train_people: usize = people / 10 * 9;
         let car_people: usize = people - train_people;
 
-        let many_route: Route;
-        let less_route: Route;
+        let many_route: mover_unit::Route;
+        let less_route: mover_unit::Route;
         let many_ride_vec: Vec<usize>;
         let less_ride_vec: Vec<usize>;
         let mut many_index = 0;
         let mut less_index = 0;
 
         if car_people > train_people{
-            many_route = Route::Car;
-            less_route = Route::Train;
+            many_route = mover_unit::Route::Car;
+            less_route = mover_unit::Route::Train;
             many_ride_vec = MoverGroupModel::generate_ride_vec(car_people);
             less_ride_vec = MoverGroupModel::generate_ride_vec(train_people);
         }else{
-            many_route = Route::Train;
-            less_route = Route::Car;
+            many_route = mover_unit::Route::Train;
+            less_route = mover_unit::Route::Car;
             many_ride_vec = MoverGroupModel::generate_ride_vec(train_people);
             less_ride_vec = MoverGroupModel::generate_ride_vec(car_people);
         }
@@ -41,7 +42,7 @@ impl MoverGroupModel{
 
         for id in 0..sum_mover{
             let start_interval: u64 = (3600 * id / (sum_mover - 1)) as u64;
-            let route: Route;
+            let route: mover_unit::Route;
             let ride: usize;
             if counter < 1.0{
                 route = many_route.clone();
@@ -55,13 +56,13 @@ impl MoverGroupModel{
                 less_index += 1;
                 counter -= 1.0;
             }
-            mover_group_model.model_item.push(MoverModel::new(id, route, ride, start_interval));
+            mover_group_model.model_item.push(mover_unit::MoverModel::new(id, route, ride, start_interval));
         }
         return mover_group_model;
     }
 
     fn generate_ride_vec(people: usize) -> Vec<usize>{
-        let mut mover: Vec<usize> = Vec::new();
+        let mut ride_vec: Vec<usize> = Vec::new();
         let mut count:  usize = 0;
         loop{
             count += 1;
@@ -69,25 +70,25 @@ impl MoverGroupModel{
             let ride = totalride - (MoverGroupModel::RIDE_RATE * (count - 1) as f64).round() as usize;
             
             if totalride as usize == people{
-                mover.push(ride);
-                return mover
+                ride_vec.push(ride);
+                return ride_vec
             }else if totalride as usize > people{
-                mover.push(1);
-                return mover
+                ride_vec.push(1);
+                return ride_vec
             }else{
-                mover.push(ride);
+                ride_vec.push(ride);
             }
         }
 
     }
     
-    pub fn devide_model(&self) -> (Vec<MoverModel>,Vec<MoverModel>){
-        let mut car_mover_group: Vec<MoverModel> = Vec::new();
-        let mut train_mover_group: Vec<MoverModel> = Vec::new();
-        for mover in self.model_item.iter(){
-            match mover.route{
-                Route::Car => car_mover_group.push(mover.clone()),
-                Route:: Train => train_mover_group.push(mover.clone())
+    pub fn devide_model(&self) -> (Vec<mover_unit::MoverModel>,Vec<mover_unit::MoverModel>){
+        let mut car_mover_group: Vec<mover_unit::MoverModel> = Vec::new();
+        let mut train_mover_group: Vec<mover_unit::MoverModel> = Vec::new();
+        for mover_unit in self.model_item.iter(){
+            match mover_unit.route{
+                mover_unit::Route::Car => car_mover_group.push(mover_unit.clone()),
+                mover_unit::Route:: Train => train_mover_group.push(mover_unit.clone())
             }
         }
         return (car_mover_group,train_mover_group);
@@ -95,13 +96,13 @@ impl MoverGroupModel{
 
     pub fn gather_mover(
         &mut self,
-        mut car_mover_group: Vec<MoverModel>,
-        mut train_mover_group: Vec<MoverModel>,
+        mut car_mover_group: Vec<mover_unit::MoverModel>,
+        mut train_mover_group: Vec<mover_unit::MoverModel>,
     ){
-        let mut new_mover_group: Vec<MoverModel> = Vec::new();
+        let mut new_mover_group: Vec<mover_unit::MoverModel> = Vec::new();
         new_mover_group.append(&mut car_mover_group);
         new_mover_group.append(&mut train_mover_group);
-        new_mover_group.sort_by_key(|mover| mover.id);
+        new_mover_group.sort_by_key(|mover_unit| mover_unit.id);
 
         self.model_item = new_mover_group;
     }
@@ -132,26 +133,26 @@ impl MoverGroupModel{
     }
 
     pub fn select_route_and_report(
-        &mut self, lisning_target: usize, mut record: record_mod::SimulationRecord
-    ) -> record_mod::SimulationRecord{
+        &mut self, lisning_target: usize, mut record: record::Record
+    ) -> record::Record{
         let mut next_mover_group_model = self.model_item.clone();
         
         let movers_count: usize = self.model_item.len() as usize;
 
         for lisner_id in 0..movers_count{
-            let mover = &self.model_item[lisner_id];
+            let mover_unit = &self.model_item[lisner_id];
             let mut first_mover_id: usize = lisner_id;
-            let mut first_mover_time: u64 = mover.arrival_time - mover.start_time;
+            let mut first_mover_time: u64 = mover_unit.arrival_time - mover_unit.start_time;
 
-            match mover.route{
-                Route::Car => {
-                    record.count_car_ride += mover.ride;
-                    record.car_runtime += mover.arrival_time - mover.start_time;
+            match mover_unit.route{
+                mover_unit::Route::Car => {
+                    record.count_car_ride += mover_unit.ride;
+                    record.car_runtime += mover_unit.arrival_time - mover_unit.start_time;
                     record.count_car_mover += 1;
                 }
-                Route::Train => {
-                    record.count_train_ride += mover.ride;
-                    record.train_runtime += mover.arrival_time - mover.start_time;
+                mover_unit::Route::Train => {
+                    record.count_train_ride += mover_unit.ride;
+                    record.train_runtime += mover_unit.arrival_time - mover_unit.start_time;
                     record.count_train_mover += 1;
                 }
             }
@@ -189,51 +190,5 @@ impl MoverGroupModel{
             self.model_item[id].location = 0.0;
             self.model_item[id].velocity = 0.0;
         }
-    }
-}
-
-#[derive(Debug,Clone)]
-pub struct MoverModel{
-    pub id:   usize,
-    pub ride: usize,
-
-    pub start_time:   u64,
-    pub arrival_time: u64,
-    
-    pub route: Route,
-    
-    pub location: f64,
-    pub velocity: f64,
-}
-
-impl MoverModel{
-    pub fn new(
-        id: usize, route: Route, ride: usize, start_interval: u64) -> MoverModel{
-        let mover_model = MoverModel{
-            id: id,
-            route: route,
-            ride: ride,
-            start_time: start_interval,
-            arrival_time: std::u64::MAX,
-            location: 0.0,
-            velocity: 0.0,
-        };
-        return mover_model;
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum Route{
-    Car,
-    Train,
-}
-
-impl Route{
-    pub fn get_route_length(&self) -> f64{
-        let route_length: f64 = match self {
-            Self::Car => 11400.0,
-            Self::Train => 11400.0,
-        };
-        return route_length;
     }
 }

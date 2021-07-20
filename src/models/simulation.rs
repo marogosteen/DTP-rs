@@ -1,8 +1,9 @@
-use crate::models::mover_group_mod;
-use crate::models::record_mod;
+use crate::models::mover_group;
+use crate::models::mover_unit;
+use crate::models::record;
 
 pub struct SimulationModel{
-    pub mover_group_model: mover_group_mod::MoverGroupModel,
+    pub mover_group_model: mover_group::MoverGroupModel,
     pub time_interval: u64,
     pub car_lane: f64,
     pub car_max_velocity: f64,
@@ -13,11 +14,11 @@ pub struct SimulationModel{
 impl SimulationModel{
     pub fn run(mut self, days: usize){
         let mut best_day: usize = 1;
-        let mut best_record = record_mod::SimulationRecord::new();
+        let mut best_record = record::Record::new();
 
         for day in 1..=days{ 
             println!("\nday: {}",day);
-            let mut record = record_mod::SimulationRecord::new();
+            let mut record = record::Record::new();
 
             let (mut car_mover_group, mut train_mover_group) 
                 = self.mover_group_model.devide_model();            
@@ -45,8 +46,8 @@ impl SimulationModel{
 
     fn cars_run(
         &self, 
-        mut car_mover_group: Vec<mover_group_mod::MoverModel>,
-    ) -> Vec<mover_group_mod::MoverModel>{
+        mut car_mover_group: Vec<mover_unit::MoverModel>,
+    ) -> Vec<mover_unit::MoverModel>{
         if car_mover_group.len() == 0{
             return car_mover_group
         }
@@ -90,14 +91,14 @@ impl SimulationModel{
 
     fn trains_run(
         &self, 
-        mut train_mover_group:Vec<mover_group_mod::MoverModel>,
-    ) -> Vec<mover_group_mod::MoverModel>{
+        mut train_mover_group:Vec<mover_unit::MoverModel>,
+    ) -> Vec<mover_unit::MoverModel>{
         if train_mover_group.len() == 0{
             return train_mover_group
         }
 
         let route_length = train_mover_group[0].route.get_route_length();
-        let ride_rate = mover_group_mod::MoverGroupModel::RIDE_RATE;
+        let ride_rate = mover_group::MoverGroupModel::RIDE_RATE;
 
         let mut passengers: usize = 0;
         let mut first_passenger_id: usize = 0;
@@ -130,39 +131,3 @@ impl SimulationModel{
         return train_mover_group;
     }
 }
-
-/*pub struct SimulationRecord{
-    pub count_car_ride:   usize,
-    pub count_train_ride: usize,
-
-    pub count_car_mover:   usize,
-    pub count_train_mover: usize,
-
-    pub car_runtime:   u64,
-    pub train_runtime: u64,
-}
-
-impl SimulationRecord{
-    pub fn new() -> SimulationRecord{
-        let simulation_record = SimulationRecord{
-            count_car_ride: 0,
-            car_runtime: 0,
-            count_car_mover: 0,
-            count_train_ride: 0,
-            train_runtime: 0,
-            count_train_mover: 0,
-        };
-
-        return simulation_record
-    }
-}*/
-
-/*fn write_log(record: &SimulationRecord){
-    println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
-    println!(
-        "car_runtime:{} trian_runtime:{} \nsum_time:{}", 
-        record.car_runtime, 
-        record.train_runtime, 
-        record.car_runtime + record.train_runtime
-    );
-}*/

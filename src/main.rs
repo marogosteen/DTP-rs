@@ -11,9 +11,9 @@ fn main(){
     const TRAIN_CAPACITY: usize = 100;
     const TRAIN_VELOCITY: f64 = 31.1 ;
 
-    let mover_group_model = models::mover_group_mod::MoverGroupModel::new(PEOPLE);
+    let mover_group_model = models::mover_group::MoverGroupModel::new(PEOPLE);
 
-    let simuration_model = models::simulation_mod::SimulationModel{
+    let simuration_model = models::simulation::SimulationModel{
         mover_group_model: mover_group_model,
         time_interval: TIME_INTERVAL,
         car_lane: CAR_LANE as f64,

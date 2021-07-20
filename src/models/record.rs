@@ -1,4 +1,4 @@
-pub struct SimulationRecord{
+pub struct Record{
     pub count_car_ride:   usize,
     pub count_train_ride: usize,
 
@@ -9,9 +9,9 @@ pub struct SimulationRecord{
     pub train_runtime: u64,
 }
 
-impl SimulationRecord{
-    pub fn new() -> SimulationRecord{
-        let simulation_record = SimulationRecord{
+impl Record{
+    pub fn new() -> Record{
+        let simulation_record = Record{
             count_car_ride: 0,
             car_runtime: 0,
             count_car_mover: 0,
@@ -23,7 +23,6 @@ impl SimulationRecord{
         return simulation_record
     }
 
-    //pub fn write_log(record: &SimulationRecord){
     pub fn write_log(&self){
         println!("car_ride:{} train_ride:{}", self.count_car_ride, self.count_train_ride);
         println!(
