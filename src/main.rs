@@ -15,10 +15,10 @@ fn main(){
     const TRAIN_CAPACITY: usize = 100;
     const TRAIN_VELOCITY: f64 = 31.1 ;
 
-    let mover_group_model = MoverGroup::new(PEOPLE);
+    let mover_group = MoverGroup::new(PEOPLE);
     let record = Record::new();
     let simuration_model = SimulationModel{
-        mover_group_model: mover_group_model,
+        mover_group: mover_group,
         time_interval: TIME_INTERVAL,
         car_lane: CAR_LANE as f64,
         car_max_velocity: CAR_MAX_VELOCITY,

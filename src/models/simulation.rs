@@ -3,7 +3,7 @@ use crate::models::mover_unit::MoverUnit;
 use crate::models::record::Record;
 
 pub struct SimulationModel{
-    pub mover_group_model: MoverGroup,
+    pub mover_group: MoverGroup,
     pub time_interval: u64,
     pub car_lane: f64,
     pub car_max_velocity: f64,
@@ -22,20 +22,20 @@ impl SimulationModel{
             let mut record = Record::new();
 
             let (mut car_mover_group, mut train_mover_group) 
-                = self.mover_group_model.devide_model();            
+                = self.mover_group.devide_model();       
             car_mover_group = self.cars_run(car_mover_group);
             train_mover_group = self.trains_run(train_mover_group);
-            self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
-
+            self.mover_group.gather_mover(car_mover_group, train_mover_group);
+            
             let lisning_target_count = 3;
-            record = self.mover_group_model.select_route_and_report(lisning_target_count, record);
+            record = self.mover_group.select_route_and_report(lisning_target_count, record);
             record.write_log();
 
             if best_record.mover_group_runtime > record .mover_group_runtime{
                 best_day = day;
                 best_record = record;
             }
-            self.mover_group_model.initialize();
+            self.mover_group.initialize();
         }
 
         println!("\nbest record \nday:{}",best_day);

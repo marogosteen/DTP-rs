@@ -11,7 +11,7 @@ impl MoverGroup{
     pub const RIDE_RATE: f64 = 1.43;
 
     pub fn new(people: usize) -> MoverGroup{
-        let mut mover_group_model = MoverGroup{
+        let mut mover_group = MoverGroup{
             model_item: Vec::new()
         };
 
@@ -57,9 +57,9 @@ impl MoverGroup{
                 less_index += 1;
                 counter -= 1.0;
             }
-            mover_group_model.model_item.push(MoverUnit::new(id, route, ride, start_interval));
+            mover_group.model_item.push(MoverUnit::new(id, route, ride, start_interval));
         }
-        return mover_group_model;
+        return mover_group;
     }
 
     fn generate_ride_vec(people: usize) -> Vec<usize>{
