@@ -1,53 +1,51 @@
-use crate::models::mover_group_mod;
+use crate::models::mover_group::MoverGroup;
+use crate::models::mover_unit::MoverUnit;
+use crate::models::record::Record;
 
 pub struct SimulationModel{
-    pub mover_group_model: mover_group_mod::MoverGroupModel,
+    pub mover_group: MoverGroup,
     pub time_interval: u64,
     pub car_lane: f64,
     pub car_max_velocity: f64,
     pub train_capacity: usize,
     pub train_velocity: f64,
+    pub record: Record,
 }
 
 impl SimulationModel{
     pub fn run(mut self, days: usize){
         let mut best_day: usize = 1;
-        let mut best_record = SimulationRecord::new();
+        let mut best_record = Record::new();
 
         for day in 1..=days{ 
             println!("\nday: {}",day);
-            let mut record = SimulationRecord::new();
+            let mut record = Record::new();
 
             let (mut car_mover_group, mut train_mover_group) 
-                = self.mover_group_model.devide_model();            
+                = self.mover_group.devide_model();       
             car_mover_group = self.cars_run(car_mover_group);
             train_mover_group = self.trains_run(train_mover_group);
-            self.mover_group_model.gather_mover(car_mover_group, train_mover_group);
-            for mover in &self.mover_group_model.model_item{
-                println!("{:?}",mover);
-            }
+            self.mover_group.gather_mover(car_mover_group, train_mover_group);
+            
             let lisning_target_count = 3;
-            record = self.mover_group_model.select_route_and_report(lisning_target_count, record);
-            write_log(&record);
+            record = self.mover_group.select_route_and_report(lisning_target_count, record);
+            record.write_log();
 
-            if day == 1{
-                best_record = record;
-            }else if record.car_runtime + record.train_runtime < best_record.car_runtime + best_record.train_runtime {
+            if best_record.mover_group_runtime > record .mover_group_runtime{
                 best_day = day;
                 best_record = record;
             }
-
-            self.mover_group_model.initialize_mover();
+            self.mover_group.initialize();
         }
 
         println!("\nbest record \nday:{}",best_day);
-        write_log(&best_record);
+        best_record.write_log();
     }
 
     fn cars_run(
         &self, 
-        mut car_mover_group: Vec<mover_group_mod::MoverModel>,
-    ) -> Vec<mover_group_mod::MoverModel>{
+        mut car_mover_group: Vec<MoverUnit>,
+    ) -> Vec<MoverUnit>{
         if car_mover_group.len() == 0{
             return car_mover_group
         }
@@ -91,14 +89,14 @@ impl SimulationModel{
 
     fn trains_run(
         &self, 
-        mut train_mover_group:Vec<mover_group_mod::MoverModel>,
-    ) -> Vec<mover_group_mod::MoverModel>{
+        mut train_mover_group:Vec<MoverUnit>,
+    ) -> Vec<MoverUnit>{
         if train_mover_group.len() == 0{
             return train_mover_group
         }
 
         let route_length = train_mover_group[0].route.get_route_length();
-        let ride_rate = mover_group_mod::MoverGroupModel::RIDE_RATE;
+        let ride_rate = MoverGroup::RIDE_RATE;
 
         let mut passengers: usize = 0;
         let mut first_passenger_id: usize = 0;
@@ -130,40 +128,4 @@ impl SimulationModel{
 
         return train_mover_group;
     }
-}
-
-pub struct SimulationRecord{
-    pub count_car_ride:   usize,
-    pub count_train_ride: usize,
-
-    pub count_car_mover:   usize,
-    pub count_train_mover: usize,
-
-    pub car_runtime:   u64,
-    pub train_runtime: u64,
-}
-
-impl SimulationRecord{
-    pub fn new() -> SimulationRecord{
-        let simulation_record = SimulationRecord{
-            count_car_ride: 0,
-            car_runtime: 0,
-            count_car_mover: 0,
-            count_train_ride: 0,
-            train_runtime: 0,
-            count_train_mover: 0,
-        };
-
-        return simulation_record
-    }
-}
-
-fn write_log(record: &SimulationRecord){
-    println!("car_ride:{} train_ride:{}", record.count_car_ride, record.count_train_ride);
-    println!(
-        "car_runtime:{} trian_runtime:{} \nsum_time:{}", 
-        record.car_runtime, 
-        record.train_runtime, 
-        record.car_runtime + record.train_runtime
-    );
 }
