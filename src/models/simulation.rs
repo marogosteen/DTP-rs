@@ -9,6 +9,7 @@ pub struct SimulationModel{
     pub car_max_velocity: f64,
     pub train_capacity: usize,
     pub train_velocity: f64,
+    pub record: Record,
 }
 
 impl SimulationModel{
@@ -30,14 +31,11 @@ impl SimulationModel{
             record = self.mover_group_model.select_route_and_report(lisning_target_count, record);
             record.write_log();
 
-            if day == 1{
-                best_record = record;
-            }else if record.car_runtime + record.train_runtime < best_record.car_runtime + best_record.train_runtime {
+            if best_record.mover_group_runtime > record .mover_group_runtime{
                 best_day = day;
                 best_record = record;
             }
-
-            self.mover_group_model.initialize_mover();
+            self.mover_group_model.initialize();
         }
 
         println!("\nbest record \nday:{}",best_day);

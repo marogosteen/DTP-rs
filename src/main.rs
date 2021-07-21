@@ -2,6 +2,7 @@ mod models;
 
 use crate::models::mover_group::MoverGroup;
 use crate::models::simulation::SimulationModel;
+use crate::models::record::Record;
 
 fn main(){
     const PEOPLE: usize = 2500;
@@ -15,7 +16,7 @@ fn main(){
     const TRAIN_VELOCITY: f64 = 31.1 ;
 
     let mover_group_model = MoverGroup::new(PEOPLE);
-
+    let record = Record::new();
     let simuration_model = SimulationModel{
         mover_group_model: mover_group_model,
         time_interval: TIME_INTERVAL,
@@ -23,6 +24,7 @@ fn main(){
         car_max_velocity: CAR_MAX_VELOCITY,
         train_capacity: TRAIN_CAPACITY,
         train_velocity: TRAIN_VELOCITY,
+        record: record,
     };
 
     simuration_model.run(DAYS);

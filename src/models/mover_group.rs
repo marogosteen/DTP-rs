@@ -15,7 +15,7 @@ impl MoverGroup{
             model_item: Vec::new()
         };
 
-        let train_people: usize = people / 10 * 9;
+        let train_people: usize = people / 2;
         let car_people: usize = people - train_people;
 
         let many_route: Route;
@@ -176,15 +176,17 @@ impl MoverGroup{
             }
         }
         
-        record.car_runtime = (record.car_runtime as f64 / record.count_car_mover as f64) as u64;
-        record.train_runtime = (record.train_runtime as f64 / record.count_train_mover as f64) as u64;
+        record.mover_group_runtime = 
+            ((record.car_runtime + record.train_runtime) as f64 / self.model_item.len() as f64 ).round() as u64;
+        record.car_runtime = (record.car_runtime as f64 / record.count_car_mover as f64).round() as u64;
+        record.train_runtime = (record.train_runtime as f64 / record.count_train_mover as f64).round() as u64;
 
         self.model_item = next_mover_group_model;
 
         return record
     }
 
-    pub fn initialize_mover(&mut self){
+    pub fn initialize(&mut self){
         for id in 0..self.model_item.len(){
             self.model_item[id].arrival_time = std::u64::MAX;
             self.model_item[id].location = 0.0;
