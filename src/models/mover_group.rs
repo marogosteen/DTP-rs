@@ -10,12 +10,12 @@ pub struct MoverGroup{
 impl MoverGroup{
     pub const RIDE_RATE: f64 = 1.43;
 
-    pub fn new(people: usize) -> MoverGroup{
+    pub fn new(people: usize, train_percentage: f64) -> MoverGroup{
         let mut mover_group = MoverGroup{
             model_item: Vec::new()
         };
 
-        let train_people: usize = people / 2;
+        let train_people: usize = (people as f64 * train_percentage).round() as usize;
         let car_people: usize = people - train_people;
 
         let many_route: Route;
